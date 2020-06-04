@@ -1,0 +1,7 @@
+{
+  "development": {
+    "database": "mongodb://localhost:27017/tasks-to-do",
+    "encryption_key": ""
+  },
+  "env": "development"
+}
