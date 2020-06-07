@@ -9,7 +9,13 @@
   "author": "https://felixisaac.dev",
   "license": "MIT",
   "dependencies": {
+    "@types/bcrypt": "^3.0.0",
+    "@types/crypto-js": "^3.1.47",
+    "@types/mongo-sanitize": "^1.0.1",
     "@types/mongoose": "^5.7.22",
+    "bcrypt": "^4.0.1",
+    "crypto-js": "^4.0.0",
+    "dotenv": "^8.2.0",
     "jest": "^26.0.1",
     "koa": "^2.12.0",
     "koa-bodyparser": "^4.3.0",
@@ -17,6 +23,7 @@
     "koa-json": "^2.0.2",
     "koa-protect": "^1.0.1",
     "koa-router": "^9.0.1",
+    "mongo-sanitize": "^1.1.0",
     "mongoose": "^5.9.18",
     "typescript": "^3.9.5"
   },
