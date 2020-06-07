@@ -1,8 +1,8 @@
 import { Schema, model } from "mongoose";
 
 export const schema = new Schema({
-  username: { type: String, required: true},
-  email: { type: String, required: true },
+  username: { type: String, required: true },
+  email: { type: String, required: true, unique: true},
   authorization: {
     password: { type: String, required: true },
     twoFactorAuthentication: String,
@@ -12,7 +12,7 @@ export const schema = new Schema({
       github: String
     }
   },
-  lists: { type: Schema.Types.ObjectId, ref: "Lists"}
+  lists: { type: [Schema.Types.ObjectId], ref: "Lists", default: [] }
 }, {
   autoIndex: true,
   autoCreate: true,

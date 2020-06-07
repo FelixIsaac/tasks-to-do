@@ -4,7 +4,7 @@ export const schema = new Schema({
   name: { type: String, required: true },
   description: String,
   icon: String,
-  tasks: [{ type: Schema.Types.ObjectId, ref: "Tasks" }],
+  tasks: { type: [Schema.Types.ObjectId], ref: "Tasks", default: [] },
   user: { type: Schema.Types.ObjectId, ref: "Users", required: true }
 }, {
   autoIndex: true,
