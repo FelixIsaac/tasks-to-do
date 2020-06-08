@@ -1,4 +1,5 @@
-import { Schema, model } from "mongoose";
+import { Schema, Document, model }from "mongoose";
+import Task from "./task";
 
 export const schema = new Schema({
   name: { type: String, required: true },
@@ -15,4 +16,11 @@ export const schema = new Schema({
   _id: 1
 });
 
-export default model('Lists', schema);
+export interface List extends Document {
+  name: string;
+  description: string;
+  icon: string;
+  tasks: string[] | typeof Task[]
+}
+
+export default model<List & Document>('Lists', schema);

@@ -1,4 +1,5 @@
-import { Schema, model } from "mongoose";
+import { Schema, Document, model }from "mongoose";
+import { List } from "./list";
 
 export const schema = new Schema({
   title: { type: String, required: true },
@@ -22,4 +23,18 @@ export const schema = new Schema({
   _id: 1
 });
 
-export default model('Tasks', schema);
+interface Task extends Document {
+  title: string;
+  description: string;
+  attachments: string[];
+  checklist: {
+    title: string;
+    due: Date;
+    reminder: Date;
+  }[];
+  cover: string;
+  activity: string[];
+  list: string | List;
+}
+
+export default model<Task & Document>('Tasks', schema);
