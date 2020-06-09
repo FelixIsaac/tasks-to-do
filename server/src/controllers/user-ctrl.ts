@@ -1,7 +1,7 @@
 import Users from "../db/models/users";
 import sanitize from "mongo-sanitize";
 import bcrypt from "bcrypt";
-import { encrypt, decrypt } from "../utils/encryption";
+import { encrypt } from "../utils/encryption";
 
 export const createUser = async (username: string, email: string, password: string) => {
   if (!username || username.length < 3 || username.length > 32 || username.includes(":")) throw {
@@ -27,13 +27,13 @@ export const createUser = async (username: string, email: string, password: stri
   };
 
   try {
-    const encryptedEmail = encrypt(`${encrypt(username)}:${email}`);
+    const encryptedEmail = encrypt(email);
 
     await new Users(sanitize({
       username,
       email: encryptedEmail,
       authorization: {
-        password: await bcrypt.hash(`${encryptedEmail}:${password}`, 12)
+        password: await bcrypt.hash(`[${encrypt(username)}:${username}]${encryptedEmail}${password}`, 12)
       }
     })).save();
 
@@ -43,10 +43,37 @@ export const createUser = async (username: string, email: string, password: stri
       message: "Successfully created user"
     };
   } catch (err) {
+    if (err.name === "ValidationError") return {
+      error: false,
+      status: 200,
+      message: "Successfully created user"
+    };
+
     throw {
       error: true,
       status: 400,
       message: err.message
     };
   }
+};
+
+export const loginUser = async (email: string, password: string, ip: string) => {
+  const user = await Users.findOne({ email: sanitize(encrypt(email)) });
+
+  if (!user) throw {
+    error: true,
+    status: 400,
+    message: "Invalid email or password"
+  };
+
+  // compare password
+  const isPassword = await bcrypt.compare(`[${encrypt(user.username)}:${user.username}]${encrypt(email)}${password}`, user.authorization.password);
+
+  if (!isPassword || !ip) throw {
+    error: true,
+    status: 400,
+    message: "Invalid email or password"
+  };
+
+  return encrypt(`${encrypt(email)}${await bcrypt.hash(ip, 6)}`);
 };
