@@ -2,6 +2,7 @@
   <dictionary name="Felix Isaac">
     <words>
       <w>bcrypt</w>
+      <w>mailgun</w>
     </words>
   </dictionary>
 </component>

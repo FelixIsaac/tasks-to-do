@@ -1,8 +1,8 @@
-import mongoose, { Model } from "mongoose";
+import mongoose  from "mongoose";
 import fs from "fs";
 import path from "path";
 
-// if (!process.env.SERVER_MONGODB_CONNECTION_URI) throw "Missing MongoDB connection URI";
+if (!process.env.SERVER_MONGODB_CONNECTION_URI) throw "Missing MongoDB connection URI";
 
 mongoose.connect("mongodb://localhost:27017/tasks-to-do", {
   useNewUrlParser: true,

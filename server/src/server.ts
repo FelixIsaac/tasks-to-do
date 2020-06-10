@@ -2,6 +2,9 @@ import Koa from 'koa';
 import bodyParser from "koa-bodyparser";
 import apiRoutes from './routes/api-routes';
 import("./db")
+// config
+import { config as dotEnvConfig } from "dotenv";
+dotEnvConfig();
 
 const app = new Koa();
 
