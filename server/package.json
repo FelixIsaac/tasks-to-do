@@ -25,6 +25,7 @@
     "koa-json": "^2.0.2",
     "koa-protect": "^1.0.1",
     "koa-router": "^9.0.1",
+    "mailgun": "^0.5.0",
     "mongo-sanitize": "^1.1.0",
     "mongoose": "^5.9.18",
     "mongoose-unique-validator": "^2.0.3",

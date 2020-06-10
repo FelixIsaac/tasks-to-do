@@ -77,3 +77,21 @@ export const loginUser = async (email: string, password: string, ip: string) => 
 
   return encrypt(`${encrypt(email)}${await bcrypt.hash(ip, 6)}`);
 };
+
+export const changeEmail = async (email: string, newEmail: string, password: string) => {
+  if (!email || !newEmail || !password) throw {
+    error: true,
+    status: 400,
+    message: "Invalid email or password"
+  };
+
+
+};
+
+export const changePassword = async (email: string, password: string, newPassword: string) => {
+
+};
+
+export const removeUser = async (email: string, code: string) => {
+
+};
