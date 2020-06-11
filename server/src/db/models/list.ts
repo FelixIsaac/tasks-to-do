@@ -1,5 +1,14 @@
 import { Schema, Document, model }from "mongoose";
-import Task from "./task";
+import { ITaskDocument } from "./task";
+import { IUserDocument } from "./users";
+
+export interface IListDocument extends Document {
+  name: string;
+  description: string;
+  icon: string;
+  tasks: string[] | ITaskDocument[],
+  user: IUserDocument
+}
 
 export const schema = new Schema({
   name: { type: String, required: true },
@@ -16,11 +25,4 @@ export const schema = new Schema({
   _id: 1
 });
 
-export interface List extends Document {
-  name: string;
-  description: string;
-  icon: string;
-  tasks: string[] | typeof Task[]
-}
-
-export default model<List & Document>('Lists', schema);
+export default model<IListDocument & Document>('Lists', schema);

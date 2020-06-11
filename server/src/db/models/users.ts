@@ -1,6 +1,23 @@
 import { Schema, Document, model }from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
-import { List } from "./list";
+import { IListDocument } from "./list";
+import bcrypt from "bcrypt";
+import { encrypt } from "../../utils/encryption";
+
+export interface IUserDocument extends Document {
+  username: string;
+  email: string;
+  authorization: {
+    password: string;
+    twoFactorAuthentication: string;
+    oauth: {
+      google: string;
+      facebook: string;
+      github: string;
+    }
+  };
+  lists: string[] | IListDocument[];
+}
 
 export const schema = new Schema({
   username: { type: String, required: true },
@@ -25,19 +42,15 @@ export const schema = new Schema({
   _id: 1
 }).plugin(uniqueValidator);
 
-interface User extends Document {
-  username: string;
-  email: string;
-  authorization: {
-    password: string;
-    twoFactorAuthentication: string;
-    oauth: {
-      google: string;
-      facebook: string;
-      github: string;
-    }
-  };
-  list: List;
-}
+schema.pre<IUserDocument>("save", async function (next) {
+  if (!this.isModified('authorization.password')) return next();
 
-export default model<User & Document>("Users", schema);
+  try {
+    this.authorization.password = await bcrypt.hash(`[${encrypt(this.username)}:${this.username}]${this.email}${this.authorization.password}`, 12);
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+export default model<IUserDocument & Document>("Users", schema);
