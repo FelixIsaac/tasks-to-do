@@ -73,4 +73,20 @@ router.post("/change-password/:id", async (ctx) => {
   }
 });
 
+router.post('/delete/:id', async (ctx) => {
+  const { password } = ctx.request.body || {};
+
+  try {
+    const response = await users.removeUser(ctx.params.id, password);
+
+    ctx.status = response.status;
+    ctx.body = response;
+  } catch (err) {
+    console.error(err);
+
+    ctx.status = err.status || 500;
+    ctx.body = err;
+  }
+});
+
 export default router;

@@ -206,3 +206,34 @@ export const changePassword = async (userID: string, password: string, newPasswo
     message: "Failed to change password"
   }
 };
+
+export const removeUser = async (id: string, password: string) => {
+  if (!id || !password) throw {
+    error: true,
+    status: 401,
+    message: "Invalid email or password"
+  };
+
+  const user = await Users.findById(id);
+
+  if (!user) throw {
+    error: true,
+    status: 401,
+    message: "Invalid email or password"
+  };
+
+  if(!await comparePassword(user, password)) throw {
+    error: true,
+    status: 401,
+    message: "Invalid email or password"
+  };
+
+  // remove users
+  user.remove();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Removed user"
+  };
+};
