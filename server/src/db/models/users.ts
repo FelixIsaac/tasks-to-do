@@ -1,7 +1,7 @@
 import { Schema, Document, model }from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
 import { IListDocument } from "./list";
-import bcrypt from "bcrypt";
+import { hash } from "bcrypt";
 import { encrypt } from "../../utils/encryption";
 
 export interface IUserDocument extends Document {
@@ -46,7 +46,7 @@ schema.pre<IUserDocument>("save", async function (next) {
   if (!this.isModified('authorization.password')) return next();
 
   try {
-    this.authorization.password = await bcrypt.hash(`[${encrypt(this.username)}:${this.username}]${this.email}${this.authorization.password}`, 12);
+    this.authorization.password = await hash(`[${encrypt(this.username)}:${this.username}]${this.email}${this.authorization.password}`, 12);
     next();
   } catch (err) {
     next(err);

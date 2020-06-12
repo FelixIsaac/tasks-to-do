@@ -11,14 +11,15 @@ interface Mail {
   from: string;
   to: string;
   subject: string;
-  text: string;
-  html: string;
+  text?: string;
+  html?: string;
 }
 
 export const sendMail = async (mail: Mail) => {
   try {
-    await mg.messages().send(mail);
+    return await mg.messages().send(mail);
   } catch (err) {
     console.error(err);
+    throw err;
   }
 };

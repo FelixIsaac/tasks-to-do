@@ -3,21 +3,10 @@ import * as users from "../controllers/user-ctrl";
 const router = new Router({ prefix: "/users" });
 
 router.post('/register', async (ctx) => {
-  const { body } = ctx.request;
-
-  if (!body) {
-    ctx.status = 400;
-    ctx.body = {
-      error: true,
-      status: 400,
-      message: "Missing credentials"
-    };
-
-    return;
-  }
+  const { username, email, password } = ctx.request.body || {};
 
   try {
-    const user = await users.createUser(body.username, body.email, body.password);
+    const user = await users.createUser(username, email, password);
 
     ctx.status = user.status;
     ctx.body = user;
@@ -28,9 +17,9 @@ router.post('/register', async (ctx) => {
 });
 
 router.post('/login', async  (ctx) => {
-  const { body } = ctx.request;
+  const { email, password } = ctx.request.body || {};
 
-  if (!body) {
+  if (!email || !password) {
     ctx.status = 400;
     ctx.body = {
       error: true,
@@ -40,7 +29,7 @@ router.post('/login', async  (ctx) => {
   };
 
   try {
-    const cookie = await users.loginUser(body.email, body.password, ctx.ip);
+    const cookie = await users.loginUser(email, password, ctx.ip);
     ctx.cookies.set("session", cookie, {
       expires: new Date(Date.now() + 1210000000), // 2 weeks
       secure: process.env.NODE_ENV === "production"
@@ -57,5 +46,35 @@ router.post('/login', async  (ctx) => {
     ctx.body = err;
   }
 })
+
+router.post('/change-email/:id', async (ctx) => {
+  const { code, newEmail, password } = ctx.request.body || {};
+
+  if (!ctx.params.id) {
+    ctx.status = 400;
+    return ctx.body = {
+      error: true,
+      status: 400,
+      message: "Missing account ID"
+    };
+  }
+
+  try {
+    if (code) {
+      const response = await users.verifyEmailChange(code);
+
+      ctx.status = response.status;
+      ctx.body = response;
+    } else {
+      const response = await users.changeEmail(ctx.params.id, newEmail, password);
+
+      ctx.status = response.status;
+      ctx.body = response;
+    }
+  } catch (err) {
+    ctx.status = err.status || 500
+    ctx.body = err;
+  }
+});
 
 export default router;

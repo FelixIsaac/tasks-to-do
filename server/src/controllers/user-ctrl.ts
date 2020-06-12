@@ -1,9 +1,16 @@
-import Users from "../db/models/users";
+import { compare, hash } from "bcrypt";
 import sanitize from "mongo-sanitize";
-import bcrypt from "bcrypt";
-import { encrypt } from "../utils/encryption";
+import Users, { IUserDocument } from "../db/models/users";
+import { decrypt, encrypt } from "../utils/encryption";
+import { sendMail } from "../utils/mail";
 
 export const createUser = async (username: string, email: string, password: string) => {
+  if (!username || !email || !password) throw {
+    error: true,
+    status: 400,
+    message: "Missing credentials"
+  };
+
   if (!username || username.length < 3 || username.length > 32 || username.includes(":")) throw {
     error: true,
     status: 400,
@@ -32,9 +39,7 @@ export const createUser = async (username: string, email: string, password: stri
     await new Users(sanitize({
       username,
       email: encryptedEmail,
-      authorization: {
-        password: await bcrypt.hash(`[${encrypt(username)}:${username}]${encryptedEmail}${password}`, 12)
-      }
+      authorization: { password }
     })).save();
 
     return {
@@ -57,36 +62,106 @@ export const createUser = async (username: string, email: string, password: stri
   }
 };
 
+export const comparePassword = async (user: IUserDocument, password: string): Promise<boolean> => {
+  return await compare(`[${encrypt(user.username)}:${user.username}]${user.email}${password}`, user.authorization.password);
+}
+
 export const loginUser = async (email: string, password: string, ip: string) => {
   const user = await Users.findOne({ email: sanitize(encrypt(email)) });
 
   if (!user) throw {
     error: true,
-    status: 400,
+    status: 401,
     message: "Invalid email or password"
   };
 
   // compare password
-  const isPassword = await bcrypt.compare(`[${encrypt(user.username)}:${user.username}]${encrypt(email)}${password}`, user.authorization.password);
-
-  if (!isPassword || !ip) throw {
+  if (!await comparePassword(user, password) || !ip) throw {
     error: true,
-    status: 400,
+    status: 401,
     message: "Invalid email or password"
   };
 
-  return encrypt(`${encrypt(email)}${await bcrypt.hash(ip, 6)}`);
+  return encrypt(`${encrypt(email)}${await hash(ip, 6)}`);
 };
 
-export const changeEmail = async (email: string, newEmail: string, password: string) => {
-  if (!email || !newEmail || !password) throw {
+export const changeEmail = async (userID: string, newEmail: string, password: string) => {
+  if (!userID || !newEmail || !password) throw {
     error: true,
-    status: 400,
+    status: 401,
     message: "Invalid email or password"
   };
 
+  const user = await Users.findById(userID);
 
+  if (!user) throw {
+    error: true,
+    status: 401,
+    message: "Invalid email or password"
+  };
+
+  // verify if password matches
+  if (!await comparePassword(user, password)) throw {
+    error: true,
+    status: 401,
+    message: "Invalid email or password"
+  };
+
+  // generate code
+  const code = encrypt(`${user.email}:${encrypt(newEmail)}:${await hash(user.authorization.password, 8)}:${Date.now()}`);
+
+  // send verification to old email
+  await sendMail({
+    from: "Account security <accounts@felixisaac.dev>",
+    to: decrypt(user.email),
+    subject: "Confirmation of changing email",
+    text: `Accept email change: ${process.env.DOMAIN_NAME}/account/change-email?code=${code}`
+  });
+
+  return {
+    error: false,
+    status: 200,
+    message: "Sent email confirmation"
+  };
 };
+
+export const verifyEmailChange = async (code: string) => {
+  // verify code
+  const [email, newEmail, hashedPassword, dateAssigned] = decrypt(code).split(':');
+  const user = await Users.findOne({ "email": sanitize(email) });
+  const creationDate = new Date(parseInt(dateAssigned));
+
+  if (!email || !newEmail || !hashedPassword || isNaN(creationDate.getTime()) || !user) throw {
+    error: true,
+    status: 401,
+    message: "Invalid code"
+  };
+
+  // 10 minute expiry
+  if (email !== user.email || Date.now() > creationDate.getTime() + 600000) throw {
+    error: true,
+    status: 401,
+    message: "Invalid code"
+  };
+
+  // changing email address
+  const response = await user.update({
+    $set: {
+      email: newEmail
+    }
+  });
+
+  if (response.email === newEmail) return {
+    error: false,
+    status: 200,
+    message: "Successfully changed email"
+  };
+  else throw {
+    error: false,
+    status: 500,
+    message: "Failed to change email"
+  };
+}
 
 export const changePassword = async (email: string, password: string, newPassword: string) => {
 
