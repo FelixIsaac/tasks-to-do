@@ -43,7 +43,7 @@ router.post("/change-email/:id", async (ctx) => {
 
   try {
     if (code) {
-      const response = await users.verifyEmailChange(code);
+      const response = await users.verifyEmailChange(code, password);
 
       ctx.status = response.status;
       ctx.body = response;

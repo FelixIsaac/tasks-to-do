@@ -64,7 +64,7 @@ export const createUser = async (username: string, email: string, password: stri
 
 export const comparePassword = async (user: IUserDocument, password: string): Promise<boolean> => {
   return await compare(`[${encrypt(user.username)}:${user.username}]${user.email}${password}`, user.authorization.password);
-}
+};
 
 export const loginUser = async (email: string, password: string, ip: string) => {
   const user = await Users.findOne({ email: sanitize(encrypt(email)) });
@@ -125,7 +125,7 @@ export const changeEmail = async (userID: string, newEmail: string, password: st
   };
 };
 
-export const verifyEmailChange = async (code: string) => {
+export const verifyEmailChange = async (code: string, password: string) => {
   // verify code
   const [email, newEmail, hashedPassword, dateAssigned] = decrypt(code).split(':');
   const user = await Users.findOne({ "email": sanitize(email) });
@@ -134,18 +134,26 @@ export const verifyEmailChange = async (code: string) => {
   if (!email || !newEmail || !hashedPassword || isNaN(creationDate.getTime()) || !user) throw {
     error: true,
     status: 401,
-    message: "Invalid code"
+    message: "Invalid code or password"
   };
 
   // 10 minute expiry
   if (email !== user.email || Date.now() > creationDate.getTime() + 600000) throw {
     error: true,
     status: 401,
-    message: "Invalid code"
+    message: "Invalid code or password"
+  };
+
+  // verify password
+  if (!await comparePassword(user, password)) throw {
+    error: true,
+    status: 401,
+    message: "Invalid code or password"
   };
 
   // changing email address
   user.email = sanitize(newEmail)
+  user.authorization.password = password;
   const response = await user.save();
 
   if (response.email === newEmail) return {
@@ -167,6 +175,12 @@ export const changePassword = async (userID: string, password: string, newPasswo
     message: "Invalid email or password"
   };
 
+  if (password === newPassword) throw {
+    error: true,
+    status: 400,
+    message: "Old password and new password cannot be the same"
+  };
+
   const user = await Users.findById(userID);
 
   if (!user) throw {
@@ -186,7 +200,7 @@ export const changePassword = async (userID: string, password: string, newPasswo
   user.authorization.password = sanitize(newPassword);
   const response = await user.save()
 
-  if (!await comparePassword(user, newPassword)) {
+  if (await comparePassword(response, newPassword)) {
     // send alert to email
     await sendMail({
       from: "Account security <accounts@felixisaac.dev>",
