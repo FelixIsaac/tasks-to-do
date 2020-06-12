@@ -33,7 +33,9 @@ router.post("/login", async  (ctx) => {
       message: "Logging in"
     };
   } catch (err) {
-    ctx.status = err.status;
+    if (!err.status) console.error(err);
+
+    ctx.status = err.status || 500;
     ctx.body = err;
   }
 })

@@ -98,7 +98,27 @@ export const loginUser = async (email: string, password: string, ip: string) => 
     message: "Invalid email or password"
   };
 
-  return encrypt(`${encrypt(email)}${await hash(ip, 6)}`);
+  return encrypt(`${encrypt(encrypt(email))}:${await hash(ip, 6)}`);
+};
+
+export const validateCookie = async (cookie: string, ip: string) => {
+  if (!cookie) return false;
+
+  const [encryptedEmail = "", hashedIP = ""] = decrypt(cookie).split(':');
+  // check IP
+  if (!await compare(ip, hashedIP)) return false;
+  // check email
+  return await Users.exists({ email: decrypt(encryptedEmail) });
+};
+
+export const getUserByCookie = async (cookie: string, ip: string) => {
+  if (!await validateCookie(cookie, ip)) throw {
+    error: true,
+    status: 405,
+    message: "Invalid email or password"
+  };
+
+  return Users.findOne({ email: decrypt(decrypt(cookie).split(':')[0]) });
 };
 
 export const changeUsername = async (userID: string, newUsername: string, password: string) => {

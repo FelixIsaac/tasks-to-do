@@ -4,9 +4,9 @@ import { IUserDocument } from "./users";
 
 export interface IListDocument extends Document {
   name: string;
-  description: string;
-  icon: string;
-  tasks: string[] | ITaskDocument[],
+  description?: string;
+  icon?: string;
+  tasks?: string[] | ITaskDocument[],
   user: IUserDocument
 }
 
