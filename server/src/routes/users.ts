@@ -2,7 +2,7 @@ import Router from "koa-router";
 import * as users from "../controllers/user-ctrl";
 const router = new Router({ prefix: "/users" });
 
-router.post('/register', async (ctx) => {
+router.post("/register", async (ctx) => {
   const { username, email, password } = ctx.request.body || {};
 
   try {
@@ -16,17 +16,8 @@ router.post('/register', async (ctx) => {
   }
 });
 
-router.post('/login', async  (ctx) => {
+router.post("/login", async  (ctx) => {
   const { email, password } = ctx.request.body || {};
-
-  if (!email || !password) {
-    ctx.status = 400;
-    ctx.body = {
-      error: true,
-      status: 400,
-      message: "Missing credentials"
-    };
-  };
 
   try {
     const cookie = await users.loginUser(email, password, ctx.ip);
@@ -47,17 +38,8 @@ router.post('/login', async  (ctx) => {
   }
 })
 
-router.post('/change-email/:id', async (ctx) => {
+router.post("/change-email/:id", async (ctx) => {
   const { code, newEmail, password } = ctx.request.body || {};
-
-  if (!ctx.params.id) {
-    ctx.status = 400;
-    return ctx.body = {
-      error: true,
-      status: 400,
-      message: "Missing account ID"
-    };
-  }
 
   try {
     if (code) {
@@ -72,7 +54,21 @@ router.post('/change-email/:id', async (ctx) => {
       ctx.body = response;
     }
   } catch (err) {
-    ctx.status = err.status || 500
+    ctx.status = err.status || 500;
+    ctx.body = err;
+  }
+});
+
+router.post("/change-password/:id", async (ctx) => {
+  const { password, newPassword } = ctx.request.body || {};
+
+  try {
+    const response = await users.changePassword(ctx.params.id, password, newPassword);
+
+    ctx.status = response.status;
+    ctx.body = response;
+  } catch (err) {
+    ctx.status = err.status || 500;
     ctx.body = err;
   }
 });

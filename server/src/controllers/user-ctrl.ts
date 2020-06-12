@@ -145,16 +145,13 @@ export const verifyEmailChange = async (code: string) => {
   };
 
   // changing email address
-  const response = await user.update({
-    $set: {
-      email: newEmail
-    }
-  });
+  user.email = sanitize(newEmail)
+  const response = await user.save();
 
   if (response.email === newEmail) return {
     error: false,
     status: 200,
-    message: "Successfully changed email"
+    message: "Changed email"
   };
   else throw {
     error: false,
@@ -163,10 +160,49 @@ export const verifyEmailChange = async (code: string) => {
   };
 }
 
-export const changePassword = async (email: string, password: string, newPassword: string) => {
+export const changePassword = async (userID: string, password: string, newPassword: string) => {
+  if (!userID || !password || !newPassword) throw {
+    error: true,
+    status: 401,
+    message: "Invalid email or password"
+  };
 
-};
+  const user = await Users.findById(userID);
 
-export const removeUser = async (email: string, code: string) => {
+  if (!user) throw {
+    error: true,
+    status: 401,
+    message: "Invalid email or password"
+  };
 
+  // verify if password matches
+  if (!await comparePassword(user, password)) throw {
+    error: true,
+    status: 401,
+    message: "Invalid email or password"
+  };
+
+  // set new password
+  user.authorization.password = sanitize(newPassword);
+  const response = await user.save()
+
+  if (!await comparePassword(user, newPassword)) {
+    // send alert to email
+    await sendMail({
+      from: "Account security <accounts@felixisaac.dev>",
+      to: decrypt(user.email),
+      subject: "Account password changed",
+      text: "Your account password has been changed"
+    });
+
+    return {
+      error: false,
+      status: 200,
+      message: "Changed password"
+    }
+  } else throw {
+    error: true,
+    status: 500,
+    message: "Failed to change password"
+  }
 };
