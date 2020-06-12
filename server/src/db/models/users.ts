@@ -46,7 +46,7 @@ schema.pre<IUserDocument>("save", async function (next) {
   if (!this.isModified('authorization.password') && !this.isModified('username') && !this.isModified('email')) return next();
 
   try {
-    this.authorization.password = await hash(`[${encrypt(this.username)}:${this.username}]${this.email}${this.authorization.password}`, 12);
+    this.authorization.password = await hash(`${this.username}${this.email}${this.authorization.password}`, 12);
     next();
   } catch (err) {
     console.error(err);

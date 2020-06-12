@@ -3,6 +3,7 @@ import sanitize from "mongo-sanitize";
 import Users, { IUserDocument } from "../db/models/users";
 import { decrypt, encrypt } from "../utils/encryption";
 import { sendMail } from "../utils/mail";
+import * as validation from "../utils/validation";
 
 export const createUser = async (username: string, email: string, password: string) => {
   if (!username || !email || !password) throw {
@@ -11,10 +12,25 @@ export const createUser = async (username: string, email: string, password: stri
     message: "Missing credentials"
   };
 
-  if (!username || username.length < 3 || username.length > 32 || username.includes(":")) throw {
+  // username validation
+  if (!validation.username(username)) throw {
     error: true,
     status: 400,
     message: "Username length cannot be more than 32 or less than 3 or cannot include ':'"
+  };
+
+  // email validation
+  if (!validation.email(email)) throw {
+    error: true,
+    status: 400,
+    message: "Invalid email address"
+  };
+
+  // password validation
+  if (!validation.password(password)) throw {
+    error: true,
+    status: 400,
+    message: "Password too insecure, must include one special character, uppercase, lowercase, and a digit"
   };
 
   if (
@@ -63,7 +79,7 @@ export const createUser = async (username: string, email: string, password: stri
 };
 
 export const comparePassword = async (user: IUserDocument, password: string): Promise<boolean> => {
-  return await compare(`[${encrypt(user.username)}:${user.username}]${user.email}${password}`, user.authorization.password);
+  return await compare(`${user.username}${user.email}${password}`, user.authorization.password);
 };
 
 export const loginUser = async (email: string, password: string, ip: string) => {
@@ -106,11 +122,18 @@ export const changeUsername = async (userID: string, newUsername: string, passwo
     message: "Invalid email or password",
   };
 
-  user.username = newUsername;
-  user.authorization.password = password;
+  // email validation
+  if (!validation.username(newUsername)) throw {
+    error: true,
+    status: 400,
+    message: "Username length cannot be more than 32 or less than 3 or cannot include ':'"
+  }
+
+  user.username = sanitize(newUsername);
+  user.authorization.password = sanitize(password);
   const response = await user.save();
 
-  if (await comparePassword(user, password) && user.username === newUsername) return {
+  if (await comparePassword(user, password) && response.username === newUsername) return {
     error: false,
     status: 200,
     message: "Changed username"
@@ -135,6 +158,13 @@ export const changeEmail = async (userID: string, newEmail: string, password: st
     error: true,
     status: 401,
     message: "Invalid email or password"
+  };
+
+  // email validation
+  if (!validation.email(newEmail)) throw {
+    error: true,
+    status: 400,
+    message: "Invalid email address"
   };
 
   // verify if password matches
@@ -210,6 +240,13 @@ export const changePassword = async (userID: string, password: string, newPasswo
     error: true,
     status: 401,
     message: "Invalid email or password"
+  };
+
+  // password validation
+  if (!validation.password(password)) throw {
+    error: true,
+    status: 400,
+    message: "Password too insecure, must include one special character, uppercase, lowercase, and a digit"
   };
 
   if (password === newPassword) throw {

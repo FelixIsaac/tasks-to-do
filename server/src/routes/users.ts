@@ -52,7 +52,7 @@ router.patch('/change/username/:id', async (ctx) => {
   }
 })
 
-router.post("/change-email/:id", async (ctx) => {
+router.patch("/change/email/:id", async (ctx) => {
   const { code, newEmail, password } = ctx.request.body || {};
 
   try {
@@ -73,7 +73,7 @@ router.post("/change-email/:id", async (ctx) => {
   }
 });
 
-router.post("/change-password/:id", async (ctx) => {
+router.patch("/change/password/:id", async (ctx) => {
   const { password, newPassword } = ctx.request.body || {};
 
   try {
