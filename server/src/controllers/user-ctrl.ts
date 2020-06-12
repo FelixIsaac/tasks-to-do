@@ -85,6 +85,43 @@ export const loginUser = async (email: string, password: string, ip: string) => 
   return encrypt(`${encrypt(email)}${await hash(ip, 6)}`);
 };
 
+export const changeUsername = async (userID: string, newUsername: string, password: string) => {
+  if (!userID || !newUsername || !password) throw {
+    error: true,
+    status: 401,
+    message: "Invalid email or password"
+  };
+
+  const user = await Users.findById(userID);
+
+  if (!user) throw {
+    error: true,
+    status: 401,
+    message: "Invalid email or password"
+  };
+
+  if (!await comparePassword(user, password)) throw {
+    error: true,
+    status: 401,
+    message: "Invalid email or password",
+  };
+
+  user.username = newUsername;
+  user.authorization.password = password;
+  const response = await user.save();
+
+  if (await comparePassword(user, password) && user.username === newUsername) return {
+    error: false,
+    status: 200,
+    message: "Changed username"
+  }
+  else throw {
+    error: true,
+    status: 401,
+    message: "Failed to change username"
+  }
+}
+
 export const changeEmail = async (userID: string, newEmail: string, password: string) => {
   if (!userID || !newEmail || !password) throw {
     error: true,

@@ -38,6 +38,20 @@ router.post("/login", async  (ctx) => {
   }
 })
 
+router.patch('/change/username/:id', async (ctx) => {
+  const { newUsername, password } = ctx.request.body || {};
+
+  try {
+    const response = await users.changeUsername(ctx.params.id, newUsername, password);
+
+    ctx.status = response.status;
+    ctx.body = response;
+  } catch (err) {
+    ctx.status = err.status || 500;
+    ctx.body = err;
+  }
+})
+
 router.post("/change-email/:id", async (ctx) => {
   const { code, newEmail, password } = ctx.request.body || {};
 
@@ -82,8 +96,6 @@ router.post('/delete/:id', async (ctx) => {
     ctx.status = response.status;
     ctx.body = response;
   } catch (err) {
-    console.error(err);
-
     ctx.status = err.status || 500;
     ctx.body = err;
   }
