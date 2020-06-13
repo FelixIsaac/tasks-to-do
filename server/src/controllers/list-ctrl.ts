@@ -96,3 +96,40 @@ export const changeName = async (cookie: string, ip: string, listID: IListDocume
   };
 };
 
+export const updateDescription = async (cookie: string, ip: string, listID: IListDocument["_id"], updatedDesc: IListDocument["description"]) => {
+  if (!updatedDesc) throw {
+    error: true,
+    status: 400,
+    message: "Missing updated list description"
+  };
+
+  const list = await Lists.findById(listID);
+
+  if (!list) throw {
+    error: true,
+    status: 400,
+    message: "List does not exists"
+  };
+
+  if (!await verifyListOwner(cookie, ip, listID)) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  // updating list description
+  list.description = updatedDesc;
+  const response = await list.save();
+
+  if (response.description === updatedDesc) return {
+    error: false,
+    status: 200,
+    message: "Updated list description"
+  }
+  else throw {
+    error: true,
+    status: 500,
+    message: "Failed to change list description"
+  };
+};
+

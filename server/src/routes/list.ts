@@ -43,6 +43,13 @@ router.patch("/update/:id/:action", async (ctx) => {
         ctx.body = response;
         break;
       }
+      case "description": {
+        let response = await listCtrl.updateDescription(session, ip, listID, ctx.request.body.description);
+
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+      }
       default:
         ctx.status = 404;
         return ctx.body = "Not Found";
