@@ -1,6 +1,7 @@
 import sanitize from "mongo-sanitize";
 import { getUserByCookie } from "./user-ctrl";
 import Lists, { IListDocument } from "../db/models/list";
+import { IUserDocument } from "../db/models/users";
 
 export const createList = async (cookie: string, ip: string, name: IListDocument["name"], description: IListDocument["description"]) => {
   if (!name) throw {
@@ -39,7 +40,7 @@ export const createList = async (cookie: string, ip: string, name: IListDocument
   };
 };
 
-export const verifyListOwner = async (cookie: string, ip: string, listID: IListDocument["_id"], returnOwner = false) => {
+export const verifyListOwner = async (cookie: string, ip: string, listID: IListDocument["_id"])=> {
   if (!listID) throw {
     error: true,
     status: 400,
@@ -55,8 +56,8 @@ export const verifyListOwner = async (cookie: string, ip: string, listID: IListD
     message: "User does not exists"
   };
 
-  if (returnOwner && user.lists.includes(listID as IListDocument["_id"])) return user;
-  return user.lists.includes(listID as IListDocument["_id"]);
+
+  return { user, owner: user.lists.includes(listID as IListDocument["_id"]) };
 };
 
 export const changeName = async (cookie: string, ip: string, listID: IListDocument["_id"], newName: IListDocument["name"]) => {
@@ -74,7 +75,7 @@ export const changeName = async (cookie: string, ip: string, listID: IListDocume
     message: "List does not exists"
   };
 
-  if (!await verifyListOwner(cookie, ip, listID)) throw {
+  if (!(await verifyListOwner(cookie, ip, listID)).owner) throw {
     error: true,
     status: 401,
     message: "Unauthorized to perform this action"
@@ -170,3 +171,44 @@ export const updateIcon = async (cookie: string, ip: string, listID: IListDocume
     message: "Changed icon URL"
   }
   else throw {
+    error: true,
+    status: 500,
+    message: "Failed to change icon URL"
+  };
+};
+
+export const removeList = async (cookie: string, ip: string, listID: IListDocument["_id"]) => {
+  if (!listID) throw {
+    error: true,
+    status: 400,
+    message: "List does not exists"
+  };
+
+  const list = await Lists.findById(listID);
+
+  if (!list) throw {
+    error: true,
+    status: 400,
+    message: "List does not exists"
+  };
+
+  const { user, owner: isListOwner } = await verifyListOwner(cookie, ip, listID);
+
+  if (!isListOwner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  list.remove();
+  console.log(user.lists);
+  user.lists.splice(user.lists.findIndex((list: IUserDocument["lists"][0]) => list === listID), 1);
+  console.log(user.lists, user.lists.findIndex((list: IUserDocument["lists"][0]) => console.log(list)));
+  await user.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Removed list"
+  }
+};
