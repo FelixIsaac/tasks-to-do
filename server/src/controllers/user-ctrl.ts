@@ -5,7 +5,7 @@ import { decrypt, encrypt } from "../utils/encryption";
 import { sendMail } from "../utils/mail";
 import * as validation from "../utils/validation";
 
-export const createUser = async (username: string, email: string, password: string) => {
+export const createUser = async (username: IUserDocument["username"], email: IUserDocument["email"], password: IUserDocument["authorization"]["password"]) => {
   if (!username || !email || !password) throw {
     error: true,
     status: 400,
@@ -78,11 +78,11 @@ export const createUser = async (username: string, email: string, password: stri
   }
 };
 
-export const comparePassword = async (user: IUserDocument, password: string): Promise<boolean> => {
+export const comparePassword = async (user: IUserDocument, password: IUserDocument["authorization"]["password"]): Promise<boolean> => {
   return await compare(`${user.username}${user.email}${password}`, user.authorization.password);
 };
 
-export const loginUser = async (email: string, password: string, ip: string) => {
+export const loginUser = async (email: IUserDocument["email"], password: IUserDocument["authorization"]["password"], ip: string) => {
   const user = await Users.findOne({ email: sanitize(encrypt(email)) });
 
   if (!user) throw {
@@ -114,14 +114,14 @@ export const validateCookie = async (cookie: string, ip: string) => {
 export const getUserByCookie = async (cookie: string, ip: string) => {
   if (!await validateCookie(cookie, ip)) throw {
     error: true,
-    status: 405,
+    status: 401,
     message: "Invalid email or password"
   };
 
   return Users.findOne({ email: decrypt(decrypt(cookie).split(':')[0]) });
 };
 
-export const changeUsername = async (userID: string, newUsername: string, password: string) => {
+export const changeUsername = async (userID: IUserDocument["_id"], newUsername: IUserDocument["username"], password: IUserDocument["authorization"]["password"]) => {
   if (!userID || !newUsername || !password) throw {
     error: true,
     status: 401,
@@ -163,9 +163,9 @@ export const changeUsername = async (userID: string, newUsername: string, passwo
     status: 401,
     message: "Failed to change username"
   }
-}
+};
 
-export const changeEmail = async (userID: string, newEmail: string, password: string) => {
+export const changeEmail = async (userID: IUserDocument["_id"], newEmail: IUserDocument["email"], password: IUserDocument["authorization"]["password"]) => {
   if (!userID || !newEmail || !password) throw {
     error: true,
     status: 401,
@@ -212,7 +212,7 @@ export const changeEmail = async (userID: string, newEmail: string, password: st
   };
 };
 
-export const verifyEmailChange = async (code: string, password: string) => {
+export const verifyEmailChange = async (code: string, password: IUserDocument["authorization"]["password"]) => {
   // verify code
   const [email, newEmail, hashedPassword, dateAssigned] = decrypt(code).split(':');
   const user = await Users.findOne({ "email": sanitize(email) });
@@ -255,7 +255,11 @@ export const verifyEmailChange = async (code: string, password: string) => {
   };
 }
 
-export const changePassword = async (userID: string, password: string, newPassword: string) => {
+export const changePassword = async (
+  userID: IUserDocument["_id"],
+  password: IUserDocument["authorization"]["password"],
+  newPassword: IUserDocument["authorization"]["password"]
+) => {
   if (!userID || !password || !newPassword) throw {
     error: true,
     status: 401,
@@ -315,7 +319,7 @@ export const changePassword = async (userID: string, password: string, newPasswo
   }
 };
 
-export const removeUser = async (id: string, password: string) => {
+export const removeUser = async (id: IUserDocument["_id"], password: IUserDocument["authorization"]["password"]) => {
   if (!id || !password) throw {
     error: true,
     status: 401,

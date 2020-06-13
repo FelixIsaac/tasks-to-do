@@ -38,3 +38,61 @@ export const createList = async (cookie: string, ip: string, name: IListDocument
     message: "Failed to create list"
   };
 };
+
+export const verifyListOwner = async (cookie: string, ip: string, listID: IListDocument["_id"], returnOwner = false) => {
+  if (!listID) throw {
+    error: true,
+    status: 400,
+    message: "Missing new list ID"
+  };
+
+  // verify user cookie
+  const user = await getUserByCookie(cookie, ip);
+
+  if (!user) throw {
+    error: true,
+    status: 400,
+    message: "User does not exists"
+  };
+
+  if (returnOwner && user.lists.includes(listID as IListDocument["_id"])) return user;
+  return user.lists.includes(listID as IListDocument["_id"]);
+};
+
+export const changeName = async (cookie: string, ip: string, listID: IListDocument["_id"], newName: IListDocument["name"]) => {
+  if (!newName || !listID) throw {
+    error: true,
+    status: 400,
+    message: "Missing new list name"
+  };
+
+  const list = await Lists.findById(listID);
+
+  if (!list) throw {
+    error: true,
+    status: 400,
+    message: "List does not exists"
+  };
+
+  if (!await verifyListOwner(cookie, ip, listID)) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  // changing list name
+  list.name = newName;
+  const response = await list.save();
+
+  if (response.name === newName) return {
+    error: false,
+    status: 200,
+    message: "Changed list name"
+  };
+  else throw {
+    error: true,
+    status: 500,
+    message: "Failed to change list name"
+  };
+};
+

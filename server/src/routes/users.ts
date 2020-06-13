@@ -11,6 +11,8 @@ router.post("/register", async (ctx) => {
     ctx.status = user.status;
     ctx.body = user;
   } catch (err) {
+    if (!err.status) console.error(err);
+
     ctx.status = err.status;
     ctx.body = err;
   }
@@ -38,9 +40,31 @@ router.post("/login", async  (ctx) => {
     ctx.status = err.status || 500;
     ctx.body = err;
   }
-})
+});
 
-router.patch('/change/username/:id', async (ctx) => {
+router.get("/logout", async (ctx) => {
+  try {
+    ctx.cookies.set("session", "");
+
+    ctx.status = 200;
+    return ctx.body = {
+      error: false,
+      status: 200,
+      message: "Logging out"
+    };
+  } catch (err) {
+    if (!err.status) console.error(err);
+
+    ctx.status = 500;
+    ctx.body = {
+      error: true,
+      status: 500,
+      message: "Failed to logout"
+    };
+  }
+});
+
+router.patch("/change/username/:id", async (ctx) => {
   const { newUsername, password } = ctx.request.body || {};
 
   try {
@@ -49,10 +73,12 @@ router.patch('/change/username/:id', async (ctx) => {
     ctx.status = response.status;
     ctx.body = response;
   } catch (err) {
+    if (!err.status) console.error(err);
+
     ctx.status = err.status || 500;
     ctx.body = err;
   }
-})
+});
 
 router.patch("/change/email/:id", async (ctx) => {
   const { code, newEmail, password } = ctx.request.body || {};
@@ -70,6 +96,8 @@ router.patch("/change/email/:id", async (ctx) => {
       ctx.body = response;
     }
   } catch (err) {
+    if (!err.status) console.error(err);
+
     ctx.status = err.status || 500;
     ctx.body = err;
   }
@@ -84,12 +112,14 @@ router.patch("/change/password/:id", async (ctx) => {
     ctx.status = response.status;
     ctx.body = response;
   } catch (err) {
+    if (!err.status) console.error(err);
+
     ctx.status = err.status || 500;
     ctx.body = err;
   }
 });
 
-router.post('/delete/:id', async (ctx) => {
+router.delete("/:id", async (ctx) => {
   const { password } = ctx.request.body || {};
 
   try {
@@ -98,6 +128,8 @@ router.post('/delete/:id', async (ctx) => {
     ctx.status = response.status;
     ctx.body = response;
   } catch (err) {
+    if (!err.status) console.error(err);
+
     ctx.status = err.status || 500;
     ctx.body = err;
   }

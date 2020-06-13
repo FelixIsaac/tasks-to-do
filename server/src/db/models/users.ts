@@ -2,7 +2,6 @@ import { Schema, Document, model }from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
 import { IListDocument } from "./list";
 import { hash } from "bcrypt";
-import { encrypt } from "../../utils/encryption";
 
 export interface IUserDocument extends Document {
   username: string;
