@@ -133,3 +133,40 @@ export const updateDescription = async (cookie: string, ip: string, listID: ILis
   };
 };
 
+export const updateIcon = async (cookie: string, ip: string, listID: IListDocument["_id"], iconURL: IListDocument["icon"]) => {
+  if (!iconURL) throw {
+    error: true,
+    status: 400,
+    message: "Missing icon URL"
+  };
+
+  if (!/^http(s)?:\/\/.+\..+$/.test(iconURL)) throw {
+    error: true,
+    status: 400,
+    message: "Invalid URL"
+  };
+
+  const list = await Lists.findById(listID);
+
+  if (!list) throw {
+    error: true,
+    status: 400,
+    message: "List does not exists"
+  };
+
+  if (!await verifyListOwner(cookie, ip, listID)) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  // updating list description
+  list.icon = iconURL;
+  const response = await list.save();
+
+  if (response.icon === iconURL) return {
+    error: false,
+    status: 200,
+    message: "Changed icon URL"
+  }
+  else throw {

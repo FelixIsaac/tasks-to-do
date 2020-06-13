@@ -50,6 +50,13 @@ router.patch("/update/:id/:action", async (ctx) => {
         ctx.body = response;
         break;
       }
+      case "icon": {
+        let response = await listCtrl.updateIcon(session, ip, listID, ctx.request.body.iconURL);
+
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+      }
       default:
         ctx.status = 404;
         return ctx.body = "Not Found";
