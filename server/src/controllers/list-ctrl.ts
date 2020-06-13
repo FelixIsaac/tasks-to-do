@@ -16,7 +16,7 @@ export const createList = async (cookie: string, ip: string, name: IListDocument
   if (!user) throw {
     error: true,
     status: 400,
-    message: "User does not exists"
+    message: "User does not exist"
   };
 
   const list = await new Lists({
@@ -53,11 +53,41 @@ export const verifyListOwner = async (cookie: string, ip: string, listID: IListD
   if (!user) throw {
     error: true,
     status: 400,
-    message: "User does not exists"
+    message: "User does not exist"
   };
 
 
   return { user, owner: user.lists.includes(listID as IListDocument["_id"]) };
+};
+
+export const getList = async (cookie: string, ip: string, listID: IListDocument["_id"]) => {
+  if (!listID) throw {
+    error: true,
+    status: 400,
+    message: "Missing list ID"
+  };
+
+  const { owner } = await verifyListOwner(cookie, ip, listID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  const list = await Lists.findById(listID).populate('tasks').populate('user', 'username lists');
+
+  if (!list) throw {
+    error: true,
+    status: 400,
+    message: "List does not exist"
+  };
+
+  return {
+    error: false,
+    status: 200,
+    data: list
+  };
 };
 
 export const changeName = async (cookie: string, ip: string, listID: IListDocument["_id"], newName: IListDocument["name"]) => {
@@ -72,7 +102,7 @@ export const changeName = async (cookie: string, ip: string, listID: IListDocume
   if (!list) throw {
     error: true,
     status: 400,
-    message: "List does not exists"
+    message: "List does not exist"
   };
 
   if (!(await verifyListOwner(cookie, ip, listID)).owner) throw {
@@ -109,10 +139,10 @@ export const updateDescription = async (cookie: string, ip: string, listID: ILis
   if (!list) throw {
     error: true,
     status: 400,
-    message: "List does not exists"
+    message: "List does not exist"
   };
 
-  if (!await verifyListOwner(cookie, ip, listID)) throw {
+  if (!(await verifyListOwner(cookie, ip, listID)).owner) throw {
     error: true,
     status: 401,
     message: "Unauthorized to perform this action"
@@ -152,10 +182,10 @@ export const updateIcon = async (cookie: string, ip: string, listID: IListDocume
   if (!list) throw {
     error: true,
     status: 400,
-    message: "List does not exists"
+    message: "List does not exist"
   };
 
-  if (!await verifyListOwner(cookie, ip, listID)) throw {
+  if (!(await verifyListOwner(cookie, ip, listID)).owner) throw {
     error: true,
     status: 401,
     message: "Unauthorized to perform this action"
@@ -181,7 +211,7 @@ export const removeList = async (cookie: string, ip: string, listID: IListDocume
   if (!listID) throw {
     error: true,
     status: 400,
-    message: "List does not exists"
+    message: "List does not exist"
   };
 
   const list = await Lists.findById(listID);
@@ -189,7 +219,7 @@ export const removeList = async (cookie: string, ip: string, listID: IListDocume
   if (!list) throw {
     error: true,
     status: 400,
-    message: "List does not exists"
+    message: "List does not exist"
   };
 
   const { user, owner: isListOwner } = await verifyListOwner(cookie, ip, listID);
@@ -201,9 +231,7 @@ export const removeList = async (cookie: string, ip: string, listID: IListDocume
   };
 
   list.remove();
-  console.log(user.lists);
   user.lists.splice(user.lists.findIndex((list: IUserDocument["lists"][0]) => list === listID), 1);
-  console.log(user.lists, user.lists.findIndex((list: IUserDocument["lists"][0]) => console.log(list)));
   await user.save();
 
   return {
