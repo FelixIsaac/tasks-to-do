@@ -1,7 +1,7 @@
 import Router from "koa-router";
 // routes
-import list from "./list";
 import users from "./users";
+import list from "./list";
 
 const apiRouter = new Router({ prefix: "/api" });
 const routers = [list, users];
