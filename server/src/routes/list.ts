@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import * as listCtrl from "../controllers/list-ctrl";
+import * as listCtrl from "../controllers/lists-ctrl";
 const router = new Router({ prefix: "/lists" });
 
 router.get("/:id", async (ctx) => {
@@ -103,59 +103,6 @@ router.delete("/:id", async (ctx) => {
 
     ctx.status = response.status;
     ctx.body = response;
-  } catch (err) {
-    if (!err.status) console.error(err);
-
-    ctx.status = err.status || 500;
-    ctx.body = err;
-  }
-})
-});
-
-router.post("/:id", async (ctx) =>{
-  const session = ctx.cookies.get("session");
-
-  if (!session) {
-    ctx.status = 401;
-    return ctx.body = {};
-  }
-
-  try {
-    const response = await listCtrl.createTask(session, ctx.ip, ctx.request.body.title, ctx.params.id);
-
-    ctx.status = response.status;
-    ctx.body = response;
-  } catch (err) {
-    if (!err.status) console.error(err);
-
-    ctx.status = err.status || 500;
-    ctx.body = err;
-  }
-});
-
-router.patch("/:listID/tasks/:taskID/:action", async (ctx) => {
-  const { listID, taskID , action } = ctx.params;
-  const session = ctx.cookies.get("session");
-  const ip = ctx.ip;
-
-  if (!session) {
-    ctx.status = 401;
-    return ctx.body = {};
-  }
-
-  try {
-    switch(action.toLowerCase()) {
-      case "title": {
-        const response = await listCtrl.updateTaskTitle(session, ip, ctx.request.body.newTitle, taskID);
-
-        ctx.status = 200;
-        ctx.body = response;
-        break;
-      }
-      default:
-        ctx.status = 404;
-        return ctx.body = "Not Found";
-    }
   } catch (err) {
     if (!err.status) console.error(err);
 

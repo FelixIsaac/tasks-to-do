@@ -1,4 +1,4 @@
-import { Schema, Document, model }from "mongoose";
+import { Schema, Document, model, Types }from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
 import { IListDocument } from "./list";
 import { hash } from "bcrypt";
@@ -15,8 +15,8 @@ export interface IUserDocument extends Document {
       github: string;
     }
   };
-  lists: Schema.Types.ObjectId[] | IListDocument[];
-  _id: Schema.Types.ObjectId;
+  lists: Types.ObjectId[] | IListDocument[];
+  _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
