@@ -1,6 +1,7 @@
 import sanitize from "mongo-sanitize";
+import { Schema } from "mongoose";
 import { getUserByCookie } from "./user-ctrl";
-import Lists, { IListDocument } from "../db/models/list";
+import Lists, { IListDocument, ITaskDocument } from "../db/models/list";
 import { IUserDocument } from "../db/models/users";
 
 export const createList = async (cookie: string, ip: string, name: IListDocument["name"], description: IListDocument["description"]) => {
@@ -53,11 +54,11 @@ export const verifyListOwner = async (cookie: string, ip: string, listID: IListD
   if (!user) throw {
     error: true,
     status: 400,
-    message: "User does not exist"
+    message: "Invalid email or password"
   };
 
 
-  return { user, owner: user.lists.includes(listID as IListDocument["_id"]) };
+  return { user, owner: (user.lists as Schema.Types.ObjectId[]).includes(listID) };
 };
 
 export const getList = async (cookie: string, ip: string, listID: IListDocument["_id"]) => {
@@ -75,7 +76,7 @@ export const getList = async (cookie: string, ip: string, listID: IListDocument[
     message: "Unauthorized to perform this action"
   };
 
-  const list = await Lists.findById(listID).populate('tasks').populate('user', 'username lists');
+  const list = await Lists.findById(listID).populate('user', 'username lists');
 
   if (!list) throw {
     error: true,
@@ -86,7 +87,7 @@ export const getList = async (cookie: string, ip: string, listID: IListDocument[
   return {
     error: false,
     status: 200,
-    data: list
+    data: list as IListDocument
   };
 };
 
@@ -112,7 +113,7 @@ export const changeName = async (cookie: string, ip: string, listID: IListDocume
   };
 
   // changing list name
-  list.name = newName;
+  list.name = sanitize(newName);
   const response = await list.save();
 
   if (response.name === newName) return {
@@ -149,7 +150,7 @@ export const updateDescription = async (cookie: string, ip: string, listID: ILis
   };
 
   // updating list description
-  list.description = updatedDesc;
+  list.description = sanitize(updatedDesc);
   const response = await list.save();
 
   if (response.description === updatedDesc) return {
@@ -192,7 +193,7 @@ export const updateIcon = async (cookie: string, ip: string, listID: IListDocume
   };
 
   // updating list description
-  list.icon = iconURL;
+  list.icon = sanitize(iconURL);
   const response = await list.save();
 
   if (response.icon === iconURL) return {

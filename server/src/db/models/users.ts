@@ -15,7 +15,10 @@ export interface IUserDocument extends Document {
       github: string;
     }
   };
-  lists: string[] | IListDocument[];
+  lists: Schema.Types.ObjectId[] | IListDocument[];
+  _id: Schema.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const schema = new Schema({
@@ -30,7 +33,7 @@ export const schema = new Schema({
       github: String
     }
   },
-  lists: { type: [Schema.Types.ObjectId], ref: "Lists", default: [] }
+  lists: [{ type: Schema.Types.ObjectId, ref: "Lists", default: [] }]
 }, {
   autoIndex: true,
   autoCreate: true,

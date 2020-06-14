@@ -121,6 +121,22 @@ export const getUserByCookie = async (cookie: string, ip: string) => {
   return Users.findOne({ email: decrypt(decrypt(cookie).split(':')[0]) });
 };
 
+export const getUserByID = async (id: IUserDocument["_id"]) => {
+  if (!id) throw {
+    error: true,
+    status: 400,
+    message: "Missing user ID"
+  };
+
+  return {
+    error: false,
+    status: 200,
+    data: await Users.findById(id)
+      .populate("lists")
+      .select("-email -authorization")
+  };
+};
+
 export const changeUsername = async (userID: IUserDocument["_id"], newUsername: IUserDocument["username"], password: IUserDocument["authorization"]["password"]) => {
   if (!userID || !newUsername || !password) throw {
     error: true,
