@@ -110,5 +110,28 @@ router.delete("/:id", async (ctx) => {
     ctx.body = err;
   }
 })
+});
+
+router.post("/:id", async (ctx) =>{
+  const session = ctx.cookies.get("session");
+
+  if (!session) {
+    ctx.status = 401;
+    return ctx.body = {};
+  }
+
+  try {
+    const response = await listCtrl.createTask(session, ctx.ip, ctx.request.body.title, ctx.params.id);
+
+    ctx.status = response.status;
+    ctx.body = response;
+  } catch (err) {
+    if (!err.status) console.error(err);
+
+    ctx.status = err.status || 500;
+    ctx.body = err;
+  }
+});
+
 
 export default router;

@@ -241,3 +241,36 @@ export const removeList = async (cookie: string, ip: string, listID: IListDocume
     message: "Removed list"
   }
 };
+
+// * Tasks
+
+export const createTask = async (cookie: string, ip: string, title: ITaskDocument["title"], listID: IListDocument["_id"]) => {
+  if (!title) throw {
+    error: true,
+    status: 400,
+    message: "Missing task title"
+  };
+
+  const { data: list } = await getList(cookie, ip, listID);
+
+  if (!list) throw {
+    error: true,
+    status: 401,
+    message: "List does not exist"
+  };
+
+  // create task
+  list.tasks.push({
+    title: sanitize(title),
+    list: sanitize(listID),
+    activity: [{ action: "CREATED", detail: "", date: new Date() }]
+  });
+
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Created task"
+  };
+};
