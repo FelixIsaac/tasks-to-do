@@ -112,3 +112,36 @@ export const changeTaskDescription = async (cookie: string, ip: string, newDescr
   };
 };
 
+export const addTaskAttachments = async (cookie: string, ip: string, attachments: ITaskDocument["attachments"], taskID: ITaskDocument["_id"]) => {
+  if (!(attachments && attachments.length) || !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing task attachments"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: " Unauthorized to perform this action"
+  };
+
+  // validate attachments
+  if (attachments.some((url) => !/^http(s)?:\/\/.+\..+$/.test(url))) throw {
+    error: true,
+    status: 400,
+    message: "One of the attachments has an invalid URL"
+  };
+
+  // saving attachments
+  list.tasks.id(taskID).attachments.push(...sanitize(attachments));
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: `Added tasked attachment${attachments.length ? "s" : ""}`
+  }
+};
+

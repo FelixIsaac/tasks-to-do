@@ -23,6 +23,37 @@ router.post("/:listID", async (ctx) =>{
   }
 });
 
+router.post("/:taskID/:action", async (ctx) => {
+  const { taskID, action } = ctx.params;
+  const session = ctx.cookies.get("session");
+  const ip = ctx.ip;
+
+  if (!session) {
+    ctx.status = 401;
+    return ctx.body = {};
+  }
+
+  try {
+    switch(action.toLowerCase()) {
+      case "attachments": {
+        const response = await taskCtrl.addTaskAttachments(session, ip, ctx.request.body.attachments, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+      }
+      default:
+        ctx.status = 404;
+        return ctx.body = "Not Found";
+    }
+  } catch (err) {
+    if (!err.status) console.error(err);
+
+    ctx.status = err.status || 500;
+    ctx.body = err;
+  }
+});
+
 router.patch("/:taskID/:action", async (ctx) => {
   const { taskID , action } = ctx.params;
   const session = ctx.cookies.get("session");

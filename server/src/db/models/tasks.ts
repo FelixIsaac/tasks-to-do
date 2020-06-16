@@ -29,11 +29,7 @@ export const Task = new Schema({
   title: { type: String, required: true },
   description: String,
   attachments: {
-    type: [{
-      action: String,
-      detail: String,
-      date: Date
-    }],
+    type: [String],
     default: []
   },
   checklist: {
