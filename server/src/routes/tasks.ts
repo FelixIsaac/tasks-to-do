@@ -100,4 +100,31 @@ router.patch("/:taskID/:action", async (ctx) => {
   }
 });
 
+router.delete("/:taskID/:action?", async (ctx) => {
+  const { taskID , action } = ctx.params;
+  const session = ctx.cookies.get("session");
+  const ip = ctx.ip;
+
+  if (!session) {
+    ctx.status = 401;
+    return ctx.body = {};
+  }
+
+  try {
+    switch(action.toLowerCase()) {
+      case "attachments":
+        const response = await taskCtrl.removeTaskAttachment(session, ip, ctx.request.body.index, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+    }
+  } catch (err) {
+    if (!err.status) console.error(err);
+
+    ctx.status = err.status || 500;
+    ctx.body = err;
+  }
+});
+
 export default router;

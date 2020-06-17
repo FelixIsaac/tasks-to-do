@@ -191,3 +191,36 @@ export const updateTaskAttachment = async (cookie: string, ip: string, attachmen
   };
 };
 
+export const removeTaskAttachment = async (cookie: string, ip: string, attachmentIndex: number, taskID: ITaskDocument["_id"]) => {
+  if (!attachmentIndex || !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing task attachment"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: " Unauthorized to perform this action"
+  };
+
+  const taskAttachments = list.tasks.id(taskID).attachments;
+
+  if (!taskAttachments[attachmentIndex]) throw {
+    error: true,
+    status: 400,
+    message: "Attachment not found"
+  };
+
+  taskAttachments.splice(attachmentIndex, 1);
+  const response = await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Removed attachment"
+  };
+};
+
