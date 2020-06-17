@@ -80,6 +80,14 @@ router.patch("/:taskID/:action", async (ctx) => {
         ctx.body = response;
         break;
       }
+      case "attachment": {
+        const { attachment, index} = ctx.request.body;
+        const response = await taskCtrl.updateTaskAttachment(session, ip, { attachment, index }, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+      }
       default:
         ctx.status = 404;
         return ctx.body = "Not Found";

@@ -145,3 +145,49 @@ export const addTaskAttachments = async (cookie: string, ip: string, attachments
   }
 };
 
+export const updateTaskAttachment = async (cookie: string, ip: string, attachment: { index: number, attachment: ITaskDocument["attachments"][0] }, taskID: ITaskDocument["_id"]) => {
+  if (!(attachment.attachment && attachment.attachment.length) || !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing task attachment"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: " Unauthorized to perform this action"
+  };
+
+  // validate attachments
+  if (!/^http(s)?:\/\/.+\..+$/.test(attachment.attachment)) throw {
+    error: true,
+    status: 400,
+    message: "Invalid attachment URL"
+  };
+
+  if (!list.tasks.id(taskID).attachments[attachment.index]) throw {
+    error: true,
+    status: 400,
+    message: "Attachment not found"
+  };
+
+  const updatedAttachments = new Array(...list.tasks.id(taskID).attachments);
+  updatedAttachments[attachment.index] = attachment.attachment;
+  list.tasks.id(taskID).attachments = updatedAttachments;
+
+  const response = await list.save();
+
+  if (response.tasks[response.tasks.findIndex(({ _id }) => _id.equals(taskID))].attachments[attachment.index] === attachment.attachment) return {
+    error: false,
+    status: 200,
+    message: "Updated attachment"
+  };
+  else throw {
+    error: true,
+    status: 400,
+    message: "Failed to update attachment"
+  };
+};
+
