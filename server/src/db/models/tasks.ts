@@ -6,17 +6,17 @@ export interface ITaskDocument extends Document {
   attachments: string[];
   checklist: {
     title: string;
-    due: Date;
-    reminder: Date;
-    steps: {
+    due: Partial<Date>;
+    reminder: Partial<Date>;
+    steps: Partial<{
       step: string;
       completed: boolean;
-    }[]
+    }[]>
     _id: Types.ObjectId;
   }[];
   cover: string;
   activity: {
-    action: "CREATED" | "UPDATE" | "ARCHIVE",
+    action: "CREATE" | "UPDATE" | "ARCHIVE" | "DELETE",
     detail: string,
     date: Date
   }[];
@@ -40,8 +40,7 @@ export const Task = new Schema({
       steps: [{
         step: String,
         completed: Boolean
-      }],
-      _id: Schema.Types.ObjectId
+      }]
     }],
     default: []
   },

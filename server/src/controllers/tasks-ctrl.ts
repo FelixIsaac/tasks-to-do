@@ -77,7 +77,14 @@ export const updateTaskTitle = async (cookie: string, ip: string, newTitle: ITas
     message: "Unauthorized to perform this action"
   };
 
-  list.tasks.id(taskID).title = sanitize(newTitle);
+  const task = list.tasks.id(taskID);
+  task.title = sanitize(newTitle);
+  task.activity.push({
+    action: "UPDATE",
+    detail: `Task title from ${list.tasks.id(taskID).title} to ${sanitize(newTitle)}`,
+    date: new Date()
+  });
+
   await list.save();
 
   return {
@@ -102,7 +109,14 @@ export const changeTaskDescription = async (cookie: string, ip: string, newDescr
     message: "Unauthorized to perform this action"
   };
 
-  list.tasks.id(taskID).description = sanitize(newDescription);
+  const task = list.tasks.id(taskID);
+  task.description = sanitize(newDescription);
+  task.activity.push({
+    action: "UPDATE",
+    detail: `Task description from ${list.tasks.id(taskID).title} to ${sanitize(newDescription)}`,
+    date: new Date()
+  });
+
   await list.save();
 
   return {
@@ -124,7 +138,7 @@ export const addTaskAttachments = async (cookie: string, ip: string, attachments
   if (!owner) throw {
     error: true,
     status: 401,
-    message: " Unauthorized to perform this action"
+    message: "Unauthorized to perform this action"
   };
 
   // validate attachments
@@ -135,7 +149,10 @@ export const addTaskAttachments = async (cookie: string, ip: string, attachments
   };
 
   // saving attachments
-  list.tasks.id(taskID).attachments.push(...sanitize(attachments));
+  const task = list.tasks.id(taskID);
+  task.attachments.push(...sanitize(attachments));
+  task.activity.push(...attachments.map((title) => ({ action: "CREATE" as "CREATE", detail: `Task attachment ${title}`, date: new Date() })));
+
   await list.save();
 
   return {
@@ -157,7 +174,7 @@ export const updateTaskAttachment = async (cookie: string, ip: string, attachmen
   if (!owner) throw {
     error: true,
     status: 401,
-    message: " Unauthorized to perform this action"
+    message: "Unauthorized to perform this action"
   };
 
   // validate attachments
@@ -167,15 +184,24 @@ export const updateTaskAttachment = async (cookie: string, ip: string, attachmen
     message: "Invalid attachment URL"
   };
 
-  if (!list.tasks.id(taskID).attachments[attachment.index]) throw {
+  const task = list.tasks.id(taskID);
+
+  if (!task.attachments[attachment.index]) throw {
     error: true,
     status: 400,
     message: "Attachment not found"
   };
 
-  const updatedAttachments = new Array(...list.tasks.id(taskID).attachments);
-  updatedAttachments[attachment.index] = attachment.attachment;
-  list.tasks.id(taskID).attachments = updatedAttachments;
+  const updatedAttachments = new Array(...sanitize(task.attachments));
+  updatedAttachments[attachment.index] = sanitize(attachment.attachment);
+
+  task.activity.push({
+    action: "UPDATE",
+    detail: `Task attachment from ${task.attachments[attachment.index]} to ${attachment.attachment}`,
+    date: new Date()
+  });
+
+  task.attachments = updatedAttachments;
 
   const response = await list.save();
 
@@ -192,10 +218,10 @@ export const updateTaskAttachment = async (cookie: string, ip: string, attachmen
 };
 
 export const removeTaskAttachment = async (cookie: string, ip: string, attachmentIndex: number, taskID: ITaskDocument["_id"]) => {
-  if (!attachmentIndex || !taskID) throw {
+  if (attachmentIndex === undefined || !taskID) throw {
     error: true,
     status: 400,
-    message: "Missing task attachment"
+    message: "Missing task index"
   };
 
   const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
@@ -203,24 +229,65 @@ export const removeTaskAttachment = async (cookie: string, ip: string, attachmen
   if (!owner) throw {
     error: true,
     status: 401,
-    message: " Unauthorized to perform this action"
+    message: "Unauthorized to perform this action"
   };
 
-  const taskAttachments = list.tasks.id(taskID).attachments;
+  const task = list.tasks.id(taskID);
 
-  if (!taskAttachments[attachmentIndex]) throw {
+  if (!task.attachments[attachmentIndex]) throw {
     error: true,
     status: 400,
     message: "Attachment not found"
   };
 
-  taskAttachments.splice(attachmentIndex, 1);
-  const response = await list.save();
+  task.activity.push({
+    action: "DELETE",
+    detail: `Task attachment ${task.attachments[attachmentIndex]}`,
+    date: new Date()
+  });
+  task.attachments.splice(attachmentIndex, 1);
+
+  await list.save();
 
   return {
     error: false,
     status: 200,
     message: "Removed attachment"
+  };
+};
+
+export const addTaskChecklists = async (cookie: string, ip: string, checklists: ITaskDocument["checklist"], taskID: ITaskDocument["_id"]) => {
+  if (!(checklists && checklists.length) || !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklists"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  // validation
+  if (checklists.some((checklist) => !checklist.title)) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist title"
+  };
+
+  const task = list.tasks.id(taskID);
+  task.checklist.push(...sanitize(checklists));
+  task.activity.push(...checklists.map(({ title }) => ({ action: "CREATE" as "CREATE", detail: `Created checklist ${title}`, date: new Date() })));
+
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Created checklist"
   };
 };
 

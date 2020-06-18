@@ -42,6 +42,13 @@ router.post("/:taskID/:action", async (ctx) => {
         ctx.body = response;
         break;
       }
+      case "checklist": {
+        const response = await taskCtrl.addTaskChecklists(session, ip, ctx.request.body.checklists, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+      }
       default:
         ctx.status = 404;
         return ctx.body = "Not Found";
@@ -88,6 +95,12 @@ router.patch("/:taskID/:action", async (ctx) => {
         ctx.body = response;
         break;
       }
+      case "checklist": {
+        break;
+      }
+      case "cover": {
+        break;
+      }
       default:
         ctx.status = 404;
         return ctx.body = "Not Found";
@@ -112,12 +125,20 @@ router.delete("/:taskID/:action?", async (ctx) => {
 
   try {
     switch(action.toLowerCase()) {
-      case "attachments":
+      case "attachments": {
         const response = await taskCtrl.removeTaskAttachment(session, ip, ctx.request.body.index, taskID);
 
         ctx.status = response.status;
         ctx.body = response;
         break;
+      }
+      case "checklist": {
+        break;
+      }
+      default: {
+        // remove task
+        break;
+      }
     }
   } catch (err) {
     if (!err.status) console.error(err);
