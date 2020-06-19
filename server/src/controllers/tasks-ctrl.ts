@@ -51,7 +51,7 @@ export const verifyTaskOwner = async (cookie: string, ip: string, taskID: ITaskD
     message: "Invalid email or password"
   };
 
-  const list = await Lists.findOne({ "tasks._id": taskID });
+  const list = await Lists.findOne({ "tasks._id": sanitize(taskID) });
 
   if (!list) throw {
     error: true,
@@ -288,6 +288,40 @@ export const addTaskChecklists = async (cookie: string, ip: string, checklists: 
     error: false,
     status: 200,
     message: "Created checklist"
+  };
+};
+
+export const updateTaskChecklistTitle = async (cookie: string, ip: string, checklist: { newTitle: string, index: number }, taskID: ITaskDocument["_id"]) => {
+  if (checklist.index === undefined || !checklist.newTitle || !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist ID or new checklist title"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  const task = list.tasks.id(taskID);
+  const taskChecklist = task.checklist[checklist.index];
+
+  if (!taskChecklist) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist"
+  };
+
+  taskChecklist.title = checklist.newTitle;
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Updated checklist title"
   };
 };
 

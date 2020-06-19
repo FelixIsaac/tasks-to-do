@@ -118,7 +118,7 @@ export const getUserByCookie = async (cookie: string, ip: string) => {
     message: "Invalid email or password"
   };
 
-  return Users.findOne({ email: decrypt(decrypt(cookie).split(':')[0]) });
+  return Users.findOne({ email: sanitize(decrypt(decrypt(cookie).split(':')[0])) });
 };
 
 export const getUserByID = async (id: IUserDocument["_id"]) => {

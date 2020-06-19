@@ -96,6 +96,11 @@ router.patch("/:taskID/:action", async (ctx) => {
         break;
       }
       case "checklist": {
+        const { index, newTitle } = ctx.request.body || {};
+        const response = await taskCtrl.updateTaskChecklistTitle(session, ip, { index, newTitle }, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
         break;
       }
       case "cover": {
