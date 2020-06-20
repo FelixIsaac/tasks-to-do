@@ -111,6 +111,11 @@ router.patch("/:taskID/:action", async (ctx) => {
         break;
       }
       case "cover": {
+        const { cover } = ctx.request.body || {};
+        const response = await taskCtrl.updateTaskCover(session ,ip , cover, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
         break;
       }
       default:

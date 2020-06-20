@@ -326,6 +326,34 @@ export const updateTaskChecklistTitle = async (cookie: string, ip: string, check
   };
 };
 
+
+export const updateTaskCover = async (cookie: string, ip: string, cover: ITaskDocument["cover"], taskID: ITaskDocument["_id"]) => {
+  if (!cover || !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing task cover or taskID ID"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  const task = list.tasks.id(taskID);
+  task.cover = cover;
+  task.activity.push({ action: "UPDATE", detail:  "Task cover", date: new Date() });
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Updated task cover"
+  };
+};
+
 export const toggleCompleteTask = async (cookie: string, ip: string, taskID: ITaskDocument["_id"]) => {
   if (!taskID) throw {
     error: true,
