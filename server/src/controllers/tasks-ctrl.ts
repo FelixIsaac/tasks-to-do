@@ -280,7 +280,7 @@ export const addTaskChecklists = async (cookie: string, ip: string, checklists: 
 
   const task = list.tasks.id(taskID);
   task.checklist.push(...sanitize(checklists));
-  task.activity.push(...checklists.map(({ title }) => ({ action: "CREATE" as "CREATE", detail: `Created checklist ${title}`, date: new Date() })));
+  task.activity.push(...checklists.map(({ title }) => ({ action: "CREATE" as "CREATE", detail: `Checklist ${title}`, date: new Date() })));
 
   await list.save();
 
@@ -315,13 +315,41 @@ export const updateTaskChecklistTitle = async (cookie: string, ip: string, check
     message: "Missing checklist"
   };
 
-  taskChecklist.title = checklist.newTitle;
+  task.activity.push({ action: "UPDATE", detail: `Checklist title from ${taskChecklist.title} to ${checklist.newTitle}`, date: new Date() });
+  taskChecklist.title = sanitize(checklist.newTitle);
   await list.save();
 
   return {
     error: false,
     status: 200,
     message: "Updated checklist title"
+  };
+};
+
+export const toggleCompleteTask = async (cookie: string, ip: string, taskID: ITaskDocument["_id"]) => {
+  if (!taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing taskID ID"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  const task = list.tasks.id(taskID);
+  task.completed = !task.completed;
+  task.activity.push({ action: "UPDATE", detail: task.completed ? "Task completed" : "Task uncompleted", date: new Date() });
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: task.completed ? "Task completed" : "Task uncompleted"
   };
 };
 

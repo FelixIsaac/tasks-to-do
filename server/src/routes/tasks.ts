@@ -103,6 +103,13 @@ router.patch("/:taskID/:action", async (ctx) => {
         ctx.body = response;
         break;
       }
+      case "complete": {
+        const response = await taskCtrl.toggleCompleteTask(session, ip, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+      }
       case "cover": {
         break;
       }
