@@ -369,6 +369,49 @@ export const dueTaskChecklist = async (cookie: string, ip: string, checklist: { 
   };
 };
 
+export const remindTaskChecklist = async (cookie: string, ip: string, checklist: { reminder: Date, index: number }, taskID: ITaskDocument["_id"]) => {
+  if (checklist.index === undefined || !checklist.reminder || !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist reminder date or checklist ID"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  const task = list.tasks.id(taskID);
+  const taskChecklist = task.checklist[checklist.index];
+
+  if (!taskChecklist) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist"
+  };
+
+  const dueDate = new Date(checklist.reminder);
+
+  if (isNaN(dueDate.getTime())) throw {
+    error: true,
+    status: 400,
+    message: "Invalid date"
+  };
+
+  taskChecklist.reminder = sanitize(dueDate);
+  task.activity.push({ action: "UPDATE", detail: "Reminder date", date: new Date() })
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Updated reminder due date"
+  };
+};
+
 
 export const updateTaskCover = async (cookie: string, ip: string, cover: ITaskDocument["cover"], taskID: ITaskDocument["_id"]) => {
   if (!cover || !taskID) throw {

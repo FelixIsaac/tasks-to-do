@@ -150,6 +150,18 @@ router.patch("/:taskID/checklists/:action", async (ctx) => {
         ctx.body = response;
         break;
       }
+      case "remind": {
+        const { reminder, index } = ctx.request.body || {};
+        const response = await taskCtrl.remindTaskChecklist(session, ip, { reminder, index }, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+      }
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+      }
     }
   } catch (err) {
     if (!err.status) console.error(err);
