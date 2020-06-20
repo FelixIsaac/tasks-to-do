@@ -130,6 +130,35 @@ router.patch("/:taskID/:action", async (ctx) => {
   }
 });
 
+router.patch("/:taskID/checklists/:action", async (ctx) => {
+  const { taskID , action } = ctx.params;
+  const session = ctx.cookies.get("session");
+  const ip = ctx.ip;
+
+  if (!session) {
+    ctx.status = 401;
+    return ctx.body = {};
+  }
+
+  try {
+    switch (action.toLowerCase()) {
+      case "due": {
+        const { due, index } = ctx.request.body || {};
+        const response = await taskCtrl.dueTaskChecklist(session, ip, { due, index }, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+      }
+    }
+  } catch (err) {
+    if (!err.status) console.error(err);
+
+    ctx.status = err.status || 500;
+    ctx.body = err;
+  }
+});
+
 router.delete("/:taskID/:action?", async (ctx) => {
   const { taskID , action } = ctx.params;
   const session = ctx.cookies.get("session");

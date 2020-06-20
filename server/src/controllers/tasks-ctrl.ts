@@ -326,6 +326,49 @@ export const updateTaskChecklistTitle = async (cookie: string, ip: string, check
   };
 };
 
+export const dueTaskChecklist = async (cookie: string, ip: string, checklist: { due: Date, index: number }, taskID: ITaskDocument["_id"]) => {
+  if (checklist.index === undefined || !checklist.due|| !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist due date or checklist ID"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  const task = list.tasks.id(taskID);
+  const taskChecklist = task.checklist[checklist.index];
+
+  if (!taskChecklist) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist"
+  };
+
+  const dueDate = new Date(checklist.due);
+
+  if (isNaN(dueDate.getTime())) throw {
+    error: true,
+    status: 400,
+    message: "Invalid date"
+  };
+
+  taskChecklist.due = sanitize(dueDate);
+  task.activity.push({ action: "UPDATE", detail: "Due date", date: new Date() })
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Updated checklist due date"
+  };
+};
+
 
 export const updateTaskCover = async (cookie: string, ip: string, cover: ITaskDocument["cover"], taskID: ITaskDocument["_id"]) => {
   if (!cover || !taskID) throw {
