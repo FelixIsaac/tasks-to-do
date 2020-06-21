@@ -49,6 +49,13 @@ router.post("/:taskID/:action", async (ctx) => {
         ctx.body = response;
         break;
       }
+      case "step": {
+        const response = await taskCtrl.addChecklistSteps(session, ip, ctx.request.body.steps, ctx.request.body.index, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+      }
       default:
         ctx.status = 404;
         return ctx.body = "Not Found";

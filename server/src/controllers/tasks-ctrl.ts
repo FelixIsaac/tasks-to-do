@@ -412,6 +412,41 @@ export const remindTaskChecklist = async (cookie: string, ip: string, checklist:
   };
 };
 
+export const addChecklistSteps = async (cookie: string, ip: string, steps: string[], checklistIndex: number, taskID: ITaskDocument["_id"]) => {
+  if (checklistIndex === undefined || !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist ID"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  const task = list.tasks.id(taskID);
+  const taskChecklist = task.checklist[checklistIndex];
+
+  if (!taskChecklist) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist"
+  };
+
+  taskChecklist.steps.push(...steps.map(step => ({ step, completed: false })));
+  task.activity.push({ action: "CREATE", detail: "Checklist step", date: new Date() });
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Added steps to checklist"
+  };
+};
+
 export const toggleCompleteChecklistStep = async (cookie: string, ip: string, stepIndex: number, checklistIndex: number, taskID: ITaskDocument["_id"]) => {
   if (checklistIndex === undefined || !taskID) throw {
     error: true,
