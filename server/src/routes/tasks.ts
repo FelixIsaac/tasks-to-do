@@ -223,6 +223,13 @@ router.delete("/:taskID/:action?", async (ctx) => {
         ctx.body = response;
         break;
       }
+      case "checklist-reminder": {
+        const response = await taskCtrl.removeTaskChecklistReminder(session, ip, ctx.request.body.index, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+      }
         break;
       }
       default: {
