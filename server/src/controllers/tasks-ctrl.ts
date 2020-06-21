@@ -519,6 +519,42 @@ export const addChecklistSteps = async (cookie: string, ip: string, steps: strin
   };
 };
 
+export const removeChecklistStep = async (cookie: string, ip: string, step: string, checklistIndex: number, taskID: ITaskDocument["_id"]) => {
+  if (checklistIndex === undefined || !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist ID"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  const task = list.tasks.id(taskID);
+  const taskChecklist = task.checklist[checklistIndex];
+
+  if (!taskChecklist) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist"
+  };
+
+  // @ts-ignore unset field
+  taskChecklist.steps.splice(checklistIndex, 1);
+  task.activity.push({ action: "DELETE", detail: "Checklist step", date: new Date() });
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Removed checklist step"
+  };
+};
+
 export const updateChecklistStep = async (cookie: string, ip: string, newStep: string, stepIndex: number, checklistIndex: number, taskID: ITaskDocument["_id"]) => {
   if (checklistIndex === undefined || !newStep || !taskID) throw {
     error: true,
