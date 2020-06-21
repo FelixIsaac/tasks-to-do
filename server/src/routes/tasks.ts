@@ -158,6 +158,10 @@ router.patch("/:taskID/checklists/:action", async (ctx) => {
         ctx.body = response;
         break;
       }
+      case "complete": {
+        const { stepIndex, checklistIndex } = ctx.request.body || {};
+        const response = await taskCtrl.toggleCompleteChecklistStep(session, ip, stepIndex, checklistIndex, taskID);
+
         ctx.status = response.status;
         ctx.body = response;
         break;

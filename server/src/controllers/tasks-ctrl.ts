@@ -412,6 +412,48 @@ export const remindTaskChecklist = async (cookie: string, ip: string, checklist:
   };
 };
 
+export const toggleCompleteChecklistStep = async (cookie: string, ip: string, stepIndex: number, checklistIndex: number, taskID: ITaskDocument["_id"]) => {
+  if (checklistIndex === undefined || !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist ID"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  const task = list.tasks.id(taskID);
+  const taskChecklist = task.checklist[checklistIndex];
+
+  if (!taskChecklist) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist"
+  };
+
+  const checklistStep = taskChecklist.steps[stepIndex];
+
+  if (!checklistStep) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist step"
+  };
+
+  checklistStep.completed = !checklistStep.completed;
+  task.activity.push({ action: "UPDATE", detail: checklistStep.completed ? "Checklist step completed" : "Checklist step uncompleted", date: new Date() });
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: checklistStep.completed ? "Checklist step completed" : "Checklist step uncompleted"
+  };
+};
 
 export const updateTaskCover = async (cookie: string, ip: string, cover: ITaskDocument["cover"], taskID: ITaskDocument["_id"]) => {
   if (!cover || !taskID) throw {
