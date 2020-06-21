@@ -369,6 +369,42 @@ export const dueTaskChecklist = async (cookie: string, ip: string, checklist: { 
   };
 };
 
+export const removeTaskChecklistDue = async (cookie: string, ip: string, checklistIndex: number, taskID: ITaskDocument["_id"]) => {
+  if (checklistIndex === undefined || !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist ID"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  const task = list.tasks.id(taskID);
+  const taskChecklist = task.checklist[checklistIndex];
+
+  if (!taskChecklist) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist"
+  };
+
+  // @ts-ignore delete field
+  taskChecklist.due = undefined;
+  task.activity.push({ action: "DELETE", detail: "Checklist due date", date: new Date() });
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Removed checklist due date"
+  };
+};
+
 export const remindTaskChecklist = async (cookie: string, ip: string, checklist: { reminder: Date, index: number }, taskID: ITaskDocument["_id"]) => {
   if (checklist.index === undefined || !checklist.reminder || !taskID) throw {
     error: true,

@@ -216,6 +216,13 @@ router.delete("/:taskID/:action?", async (ctx) => {
         ctx.body = response;
         break;
       }
+      case "checklist-due": {
+        const response = await taskCtrl.removeTaskChecklistDue(session, ip, ctx.request.body.index, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
+        break;
+      }
         break;
       }
       default: {
