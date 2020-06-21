@@ -587,3 +587,37 @@ export const toggleCompleteTask = async (cookie: string, ip: string, taskID: ITa
   };
 };
 
+export const removeTaskChecklist = async (cookie: string, ip: string, checklistIndex: number, taskID: ITaskDocument["_id"]) => {
+  if (!checklistIndex || !taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist index or taskID ID"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  const task = list.tasks.id(taskID);
+
+  if (!task.checklist[checklistIndex]) throw {
+    error: true,
+    status: 400,
+    message: "Task checklist does not exist"
+  };
+
+  task.checklist.splice(checklistIndex, 1);
+  task.activity.push({ action: "DELETE", detail: "Task checklist", date: new Date() });
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Removed task checklist"
+  };
+};
+
