@@ -729,3 +729,27 @@ export const removeTaskChecklist = async (cookie: string, ip: string, checklistI
   };
 };
 
+export const removeTask = async (cookie: string, ip: string, taskID: ITaskDocument["_id"]) => {
+  if (!taskID) throw {
+    error: true,
+    status: 400,
+    message: "Missing checklist index or taskID ID"
+  };
+
+  const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
+
+  if (!owner) throw {
+    error: true,
+    status: 401,
+    message: "Unauthorized to perform this action"
+  };
+
+  list.tasks.id(taskID).remove();
+  await list.save();
+
+  return {
+    error: false,
+    status: 200,
+    message: "Remove task"
+  };
+};

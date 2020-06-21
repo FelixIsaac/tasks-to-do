@@ -191,7 +191,7 @@ router.patch("/:taskID/checklists/:action", async (ctx) => {
 });
 
 router.delete("/:taskID/:action?", async (ctx) => {
-  const { taskID , action } = ctx.params;
+  const { taskID , action = "" } = ctx.params;
   const session = ctx.cookies.get("session");
   const ip = ctx.ip;
 
@@ -240,6 +240,10 @@ router.delete("/:taskID/:action?", async (ctx) => {
       }
       default: {
         // remove task
+        const response = await taskCtrl.removeTask(session, ip, taskID);
+
+        ctx.status = response.status;
+        ctx.body = response;
         break;
       }
     }
