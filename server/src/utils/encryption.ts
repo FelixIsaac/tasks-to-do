@@ -7,6 +7,14 @@ export const encrypt = (text: string) => {
 };
 
 export const decrypt = (text: string) => {
-  const aesCtr = new aesjs.ModeOfOperation.ctr(key, new aesjs.Counter(5));
-  return aesjs.utils.utf8.fromBytes(aesCtr.decrypt(aesjs.utils.hex.toBytes(text)));
+  try {
+    const aesCtr = new aesjs.ModeOfOperation.ctr(key, new aesjs.Counter(5));
+    return aesjs.utils.utf8.fromBytes(aesCtr.decrypt(aesjs.utils.hex.toBytes(text)));
+  } catch (err) {
+    throw {
+      error: true,
+      status: 401,
+      message: "Invalid encrypted code"
+    }
+  }
 };
