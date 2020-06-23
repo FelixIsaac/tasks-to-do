@@ -12,6 +12,4 @@ app.use(bodyParser());
 app.use(apiRoutes.routes());
 app.use(apiRoutes.allowedMethods());
 
-app.listen(3000);
-
 export default app;

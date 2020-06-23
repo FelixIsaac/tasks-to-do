@@ -3,7 +3,7 @@ import sanitize from "mongo-sanitize";
 import Users, { IUserDocument } from "../db/models/users";
 import { decrypt, encrypt } from "../utils/encryption";
 import { sendMail } from "../utils/mail";
-import * as validation from "../utils/validation";
+import validation from "../utils/validation";
 
 export const createUser = async (username: IUserDocument["username"], email: IUserDocument["email"], password: IUserDocument["authorization"]["password"]) => {
   if (!username || !email || !password) throw {

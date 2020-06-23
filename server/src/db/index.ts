@@ -1,4 +1,4 @@
-import mongoose  from "mongoose";
+import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
 
@@ -24,10 +24,12 @@ fs.readdirSync(path.resolve(__dirname, "models"))
   .forEach(async modelPath => {
     const model = await import(path.resolve(__dirname, "models", modelPath));
 
-    model.default.on("index", (err: string) => {
-      if (err) console.error("Indexing error:", model.default.modelName, err);
-      else console.info("Created index:", model.default.modelName)
-    });
+    if (model.default) {
+      model.default.on("index", (err: string) => {
+        if (err) console.error("Indexing error:", model.default.modelName, err);
+        else console.info("Created index:", model.default.modelName)
+      });
+    }
   });
 
 export default mongoose.connection;
