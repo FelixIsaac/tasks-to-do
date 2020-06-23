@@ -4,6 +4,6 @@ export const email = (email: string) => {
 
 export const username = (username: string) =>  3 < username.length && username.length <= 32 && !username.includes(":");
 
-export const password = (password: string) => /^(?=.*[A-Z]).*$/i.test(password)
+export const password = (password: string) => /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,}/gm.test(password)
 
 export default { email, username, password }

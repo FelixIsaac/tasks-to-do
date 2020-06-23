@@ -30,23 +30,7 @@ export const createUser = async (username: IUserDocument["username"], email: IUs
   if (!validation.password(password)) throw {
     error: true,
     status: 400,
-    message: "Password too insecure, must include one special character, uppercase, lowercase, and a digit"
-  };
-
-  if (
-    !email ||
-    !/\S+@\S+/.test(email)
-    || email.includes(":")
-  ) throw {
-    error: true,
-    status: 400,
-    message: "Invalid email address or cannot include ':'"
-  };
-
-  if (!password || password.length < 8 || password.includes(":")) throw {
-    error: true,
-    status: 400,
-    message: "Password length cannot be less than 8 or cannot include ':'"
+    message: "Password too insecure, must have a length of more than eight and include one special character, uppercase, lowercase, and a digit without including ':'."
   };
 
   try {
@@ -79,6 +63,7 @@ export const createUser = async (username: IUserDocument["username"], email: IUs
 };
 
 export const comparePassword = async (user: IUserDocument, password: IUserDocument["authorization"]["password"]): Promise<boolean> => {
+  if (!validation.password(password)) return false;
   return await compare(`${user.username}${user.email}${password}`, user.authorization.password);
 };
 
@@ -158,7 +143,7 @@ export const changeUsername = async (userID: IUserDocument["_id"], newUsername: 
     message: "Invalid email or password",
   };
 
-  // email validation
+  // username validation
   if (!validation.username(newUsername)) throw {
     error: true,
     status: 400,
@@ -203,6 +188,12 @@ export const changeEmail = async (userID: IUserDocument["_id"], newEmail: IUserD
     message: "Invalid email address"
   };
 
+  if (encrypt(newEmail) === user.email) throw {
+    error: true,
+    status: 400,
+    message: "Cannot be the same email"
+  };
+
   // verify if password matches
   if (!await comparePassword(user, password)) throw {
     error: true,
@@ -224,7 +215,8 @@ export const changeEmail = async (userID: IUserDocument["_id"], newEmail: IUserD
   return {
     error: false,
     status: 200,
-    message: "Sent email confirmation"
+    message: "Sent email confirmation",
+    code
   };
 };
 
@@ -245,6 +237,12 @@ export const verifyEmailChange = async (code: string, password: IUserDocument["a
     error: true,
     status: 401,
     message: "Invalid code or password"
+  };
+
+  if (email === newEmail) throw {
+    error: true,
+    status: 400,
+    message: "Email cannot be the same"
   };
 
   // verify password
@@ -283,10 +281,10 @@ export const changePassword = async (
   };
 
   // password validation
-  if (!validation.password(password)) throw {
+  if (!validation.password(newPassword)) throw {
     error: true,
     status: 400,
-    message: "Password too insecure, must include one special character, uppercase, lowercase, and a digit"
+    message: "New password too insecure, must have a length of more than eight and include one special character, uppercase, lowercase, and a digit without including ':'."
   };
 
   if (password === newPassword) throw {
@@ -356,7 +354,7 @@ export const removeUser = async (id: IUserDocument["_id"], password: IUserDocume
     message: "Invalid email or password"
   };
 
-  // remove users
+  // remove user
   user.remove();
 
   return {
