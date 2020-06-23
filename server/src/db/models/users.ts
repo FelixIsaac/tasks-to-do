@@ -8,7 +8,7 @@ export interface IUserDocument extends Document {
   email: string;
   authorization: {
     password: string;
-    twoFactorAuthentication: string;
+    twoFactorAuthentication: Partial<string>;
     oauth: {
       google: string;
       facebook: string;
@@ -49,6 +49,7 @@ schema.pre<IUserDocument>("save", async function (next) {
 
   try {
     this.authorization.password = await hash(`${this.username}${this.email}${this.authorization.password}`, 12);
+
     next();
   } catch (err) {
     console.error(err);
