@@ -57,7 +57,6 @@ export const verifyListOwner = async (cookie: string, ip: string, listID: IListD
     message: "Invalid email or password"
   };
 
-
   return { user, owner: (user.lists as Types.ObjectId[]).includes(listID) };
 };
 
@@ -68,6 +67,14 @@ export const getList = async (cookie: string, ip: string, listID: IListDocument[
     message: "Missing list ID"
   };
 
+  const list = await Lists.findById(listID);
+
+  if (!list) throw {
+    error: true,
+    status: 404,
+    message: "List does not exist"
+  };
+
   const { owner } = await verifyListOwner(cookie, ip, listID);
 
   if (!owner) throw {
@@ -76,18 +83,10 @@ export const getList = async (cookie: string, ip: string, listID: IListDocument[
     message: "Unauthorized to perform this action"
   };
 
-  const list = await Lists.findById(listID).populate('user', 'username lists');
-
-  if (!list) throw {
-    error: true,
-    status: 400,
-    message: "List does not exist"
-  };
-
   return {
     error: false,
     status: 200,
-    data: list as IListDocument
+    data: list.populate('user', 'username lists') as IListDocument
   };
 };
 
