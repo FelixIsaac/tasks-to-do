@@ -1,8 +1,8 @@
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { IUserDocument } from "../db/models/users";
 import { loginUser, createUser, getUserByCookie } from "../controllers/user-ctrl";
 import * as listCtrl from "../controllers/lists-ctrl";
+import { IUserDocument } from "../db/models/users";
 import { IListDocument } from "../db/models/list";
 
 describe("User model test", () => {
