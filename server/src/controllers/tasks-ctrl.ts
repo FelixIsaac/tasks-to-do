@@ -1,5 +1,4 @@
 import sanitize from "mongo-sanitize";
-import { Types } from "mongoose";
 import { ITaskDocument } from "../db/models/tasks";
 import Lists, { IListDocument } from "../db/models/list";
 import { getList } from "./lists-ctrl";
@@ -158,7 +157,7 @@ export const addTaskAttachments = async (cookie: string, ip: string, attachments
   return {
     error: false,
     status: 200,
-    message: `Added tasked attachment${attachments.length ? "s" : ""}`
+    message: `Added task attachment${attachments.length > 1 ? "s" : ""}`
   }
 };
 
@@ -519,7 +518,7 @@ export const addChecklistSteps = async (cookie: string, ip: string, steps: strin
   };
 };
 
-export const removeChecklistStep = async (cookie: string, ip: string, step: string, checklistIndex: number, taskID: ITaskDocument["_id"]) => {
+export const removeChecklistStep = async (cookie: string, ip: string, step: number, checklistIndex: number, taskID: ITaskDocument["_id"]) => {
   if (checklistIndex === undefined || !taskID) throw {
     error: true,
     status: 400,
@@ -544,7 +543,7 @@ export const removeChecklistStep = async (cookie: string, ip: string, step: stri
   };
 
   // @ts-ignore unset field
-  taskChecklist.steps.splice(checklistIndex, 1);
+  taskChecklist.steps.splice(step, 1);
   task.activity.push({ action: "DELETE", detail: "Checklist step", date: new Date() });
   await list.save();
 
@@ -696,7 +695,7 @@ export const toggleCompleteTask = async (cookie: string, ip: string, taskID: ITa
 };
 
 export const removeTaskChecklist = async (cookie: string, ip: string, checklistIndex: number, taskID: ITaskDocument["_id"]) => {
-  if (!checklistIndex || !taskID) throw {
+  if (checklistIndex === undefined || !taskID) throw {
     error: true,
     status: 400,
     message: "Missing checklist index or taskID ID"
