@@ -5,7 +5,7 @@ import * as listCtrl from "../controllers/lists-ctrl";
 import { IUserDocument } from "../db/models/users";
 import { IListDocument } from "../db/models/list";
 
-describe("User model test", () => {
+describe("List model test", () => {
   // Additional time for downloading MongoDB binaries.
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 600000;
 
@@ -46,12 +46,15 @@ describe("User model test", () => {
       expect(response.status).toBe(200);
       expect(response.message).toBe("Created list");
       expect(updatedUser.lists).toHaveLength(1);
+
+      list = updatedUser.lists[0] as IListDocument;
     } catch (err) {
       fail(err);
     }
 
     try {
       await listCtrl.createList("invalid-cookie", "234.23.12.2.4", "Test list", "");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -63,7 +66,6 @@ describe("User model test", () => {
     try {
       const response = await listCtrl.getList(cookie, "234.23.12.2.4", list._id);
 
-      list = response.data;
       expect(response.error).toBeFalsy();
       expect(response.status).toBe(200);
       expect(response.data._id).toBeDefined();
@@ -73,6 +75,7 @@ describe("User model test", () => {
 
     try {
       await listCtrl.getList("invalid-cookie", "234.23.12.2.4", list._id);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -82,6 +85,7 @@ describe("User model test", () => {
 
     try {
       await listCtrl.getList(cookie, "invalid-ip", list._id);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -108,6 +112,7 @@ describe("User model test", () => {
 
     try {
       await listCtrl.changeName("invalid-cookie", "234.23.12.2.4", list._id, "Updated name");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -116,6 +121,7 @@ describe("User model test", () => {
 
     try {
       await listCtrl.changeName(cookie, "invalid-ip", list._id, "Updated name");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -142,6 +148,7 @@ describe("User model test", () => {
 
     try {
       await listCtrl.updateDescription("invalid-cookie", "234.23.12.2.4", list._id, "Very description list description");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -150,6 +157,7 @@ describe("User model test", () => {
 
     try {
       await listCtrl.updateDescription(cookie, "invalid-ip", list._id, "Very description list description");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -175,6 +183,7 @@ describe("User model test", () => {
 
     try {
       await listCtrl.updateIcon(cookie, "234.23.12.2.4", list._id, "invalid-url");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -183,6 +192,7 @@ describe("User model test", () => {
 
     try {
       await listCtrl.updateIcon("invalid-cookie", "234.23.12.2.4", list._id, "http://example.com/example.icon");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -191,6 +201,7 @@ describe("User model test", () => {
 
     try {
       await listCtrl.updateIcon(cookie, "invalid-ip", list._id, "http://example.com/example.icon");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -203,6 +214,7 @@ describe("User model test", () => {
 
     try {
       await listCtrl.removeList("invalid-cookie", "234.23.12.2.4", list._id);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -211,6 +223,7 @@ describe("User model test", () => {
 
     try {
       await listCtrl.removeList(cookie, "invalid-ip", list._id);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -225,6 +238,7 @@ describe("User model test", () => {
       expect(response.message).toBe("Removed list");
       // checking if list is deleted
       await listCtrl.getList(cookie, "234.23.12.2.4", list._id);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(404);

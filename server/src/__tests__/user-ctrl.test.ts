@@ -117,6 +117,7 @@ describe("User model test", () => {
 
     try {
       await userCtrl.changeUsername(user._id, "F", "strong p@ssW0rd");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -125,6 +126,7 @@ describe("User model test", () => {
 
     try {
       await userCtrl.changeUsername(user._id, "Isaac", "wrong password");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -150,6 +152,7 @@ describe("User model test", () => {
       expect(changingEmailResponse.message).toBe("Changed email");
 
       await userCtrl.verifyEmailChange(response.code, "wrong p@ssW0rd");
+      fail("Meant to have error");
     } catch (response) {
       if (!response.error) fail(response);
 
@@ -160,6 +163,7 @@ describe("User model test", () => {
 
     try {
       await userCtrl.verifyEmailChange("invalid-code", "strong p@ssW0rd");
+      fail("Meant to have error");
     } catch (response) {
       if (!response.error) fail(response);
 
@@ -169,7 +173,8 @@ describe("User model test", () => {
     }
 
     try {
-      await userCtrl.changeEmail(user._id, "felix@felixisaac.dev", "strong p@ssW0rd");
+      await userCtrl.changeEmail(user._id, "me@felixisaac.dev", "strong p@ssW0rd");
+      fail("Meant to have error");
     } catch (response) {
       if (!response.error) fail(response);
 
@@ -180,6 +185,7 @@ describe("User model test", () => {
 
     try {
       await userCtrl.changeEmail(user._id, "isaac@felixisaac.dev", "wrong p@sswW0rd");
+      fail("Meant to have error");
     } catch (response) {
       if (!response.error) fail(response);
 
@@ -194,6 +200,7 @@ describe("User model test", () => {
 
     try {
       await userCtrl.changePassword(user._id, "strong p@ssW0rd", "insecure password");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -202,6 +209,7 @@ describe("User model test", () => {
 
     try {
       await userCtrl.changePassword(user._id, "wrong p@ssW0rd", "good new p@ssW0rd");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -224,6 +232,7 @@ describe("User model test", () => {
 
     try {
       await userCtrl.removeUser(user._id, "wrong p@ssW0rd");
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);

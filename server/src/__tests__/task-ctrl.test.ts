@@ -16,7 +16,6 @@ describe("Task model test", () => {
   let user: IUserDocument | null;
   let list: IListDocument;
   let taskID: ITaskDocument["_id"];
-  let task: ITaskDocument;
 
   beforeAll(async () => {
     mongoServer = new MongoMemoryServer();
@@ -62,6 +61,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.createTask("invalid-cookie", "234.23.12.2.4", "Go to dentist appointment", list._id);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -70,6 +70,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.createTask(cookie, "invalid-cookie", "Go to dentist appointment", list._id);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -90,6 +91,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.verifyTaskOwner("invalid-cookie", "234.23.12.2.4", list._id);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -98,6 +100,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.createTask(cookie, "invalid-ip", "Go to dentist appointment", list._id);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -122,6 +125,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.addTaskAttachments("invalid-cookie", "234.23.12.2.4", ["https://example.com"], taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -130,6 +134,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.addTaskAttachments(cookie, "invalid-ip", ["https://example.com"], taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -138,6 +143,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.addTaskAttachments(cookie, "234.23.12.2.4", ["invalid-link"], taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -164,6 +170,7 @@ describe("Task model test", () => {
     try {
       // @ts-ignore
       await taskCtrl.addTaskChecklists("invalid-cookie", "234.23.12.2.4", [{ title: "Things to do while waiting for dentist" }], taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -173,6 +180,7 @@ describe("Task model test", () => {
     try {
       // @ts-ignore
       await taskCtrl.addTaskChecklists(cookie, "invalid-ip", [{ title: "Things to do while waiting for dentist" }], taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -182,6 +190,7 @@ describe("Task model test", () => {
     try {
       // @ts-ignore
       await taskCtrl.addTaskChecklists(cookie, "234.23.12.2.4", ["invalid-checklist"], taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -206,6 +215,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.addChecklistSteps(cookie, "234.23.12.2.4", ["Check emails", "Play chess with bot"], 1, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -214,6 +224,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.addChecklistSteps("invalid-cookie", "234.23.12.2.4", ["Check emails", "Play chess with bot"], 1, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -222,6 +233,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.addChecklistSteps(cookie, "invalid-ip", ["Check emails", "Play chess with bot"], 1, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -245,6 +257,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.updateTaskTitle("invalid-cookie", "234.23.12.2.4", "Updated title", taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -253,6 +266,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.updateTaskTitle(cookie, "invalid-ip", "Updated title", taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -276,6 +290,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.changeTaskDescription("invalid-cookie", "234.23.12.2.4", "Updated description", taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -284,6 +299,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.changeTaskDescription(cookie, "invalid-ip", "Updated description", taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -307,6 +323,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.updateTaskAttachment(cookie, "234.23.12.2.4", { index: 1, attachment: "https://example.com/attachment" }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -315,6 +332,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.updateTaskAttachment(cookie, "234.23.12.2.4", { index: 0, attachment: "invalid-link" }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -323,6 +341,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.updateTaskAttachment("invalid-cookie", "234.23.12.2.4", { index: 0, attachment: "https://example.com/attachment" }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -331,6 +350,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.updateTaskAttachment(cookie, "invalid-ip", { index: 0, attachment: "https://example.com/attachment" }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -354,6 +374,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.updateTaskChecklistTitle(cookie, "234.23.12.2.4", { newTitle: "Updated task title", index: 1 }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -362,6 +383,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.updateTaskChecklistTitle("invalid-cookie", "234.23.12.2.4", { newTitle: "Updated task title", index: 0 }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -370,6 +392,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.updateTaskChecklistTitle(cookie, "invalid-ip", { newTitle: "Updated task title", index: 0 }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -403,6 +426,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.toggleCompleteTask("invalid-cookie", "234.23.12.2.4", taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -411,6 +435,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.toggleCompleteTask(cookie, "invalid-ip", taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -434,6 +459,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.updateTaskCover(cookie, "234.23.12.2.4", "invalid-link", taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -442,6 +468,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.updateTaskCover("invalid-cookie", "234.23.12.2.4", "https://example.com/cover", taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -450,6 +477,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.updateTaskCover(cookie, "invalid-ip", "https://example.com/cover", taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -473,6 +501,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.dueTaskChecklist(cookie, "234.23.12.2.4", { due: new Date("invalid date"), index: 0 }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -481,6 +510,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.dueTaskChecklist(cookie, "234.23.12.2.4", { due: new Date(), index: 1 }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -489,6 +519,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.dueTaskChecklist("invalid-cookie", "234.23.12.2.4", { due: new Date(), index: 0 }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -497,6 +528,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.dueTaskChecklist(cookie, "invalid-ip", { due: new Date(), index: 0 }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -520,6 +552,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.remindTaskChecklist(cookie, "234.23.12.2.4", { reminder: new Date("invalid date"), index: 0 }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -528,6 +561,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.remindTaskChecklist(cookie, "234.23.12.2.4", { reminder: new Date(), index: 1 }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -536,6 +570,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.remindTaskChecklist("invalid-cookie", "234.23.12.2.4", { reminder: new Date(), index: 0 }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -544,6 +579,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.remindTaskChecklist(cookie, "invalid-ip", { reminder: new Date(), index: 0 }, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -577,6 +613,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.toggleCompleteChecklistStep(cookie, "234.23.12.2.4", 0, 1, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -585,6 +622,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.toggleCompleteChecklistStep(cookie, "234.23.12.2.4", 2, 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -592,7 +630,8 @@ describe("Task model test", () => {
     }
 
     try {
-      await taskCtrl.toggleCompleteChecklistStep(cookie, "234.23.12.2.4", 0, 0, taskID);
+      await taskCtrl.toggleCompleteChecklistStep("invalid-cookie", "234.23.12.2.4", 0, 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -600,7 +639,8 @@ describe("Task model test", () => {
     }
 
     try {
-      await taskCtrl.toggleCompleteChecklistStep(cookie, "234.23.12.2.4", 0, 0, taskID);
+      await taskCtrl.toggleCompleteChecklistStep(cookie, "invalid-ip", 0, 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -614,6 +654,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.removeTaskAttachment("invalid-cookie", "234.23.12.2.4", 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -622,6 +663,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.removeTaskAttachment(cookie, "invalid-ip", 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -630,6 +672,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.removeTaskAttachment(cookie, "234.23.12.2.4", 1, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -673,6 +716,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.removeChecklistStep(cookie, "234.23.12.2.4", 0, 1, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -680,15 +724,8 @@ describe("Task model test", () => {
     }
 
     try {
-      await taskCtrl.removeChecklistStep(cookie, "234.23.12.2.4", 2, 0, taskID);
-    } catch (response) {
-      expect(response.error).toBeTruthy();
-      expect(response.status).toBe(400);
-      expect(response.message).toBe("Missing checklist step");
-    }
-
-    try {
-      await taskCtrl.removeChecklistStep(cookie, "234.23.12.2.4", 0, 0, taskID);
+      await taskCtrl.removeChecklistStep("invalid-cookie", "234.23.12.2.4", 0, 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -696,7 +733,8 @@ describe("Task model test", () => {
     }
 
     try {
-      await taskCtrl.removeChecklistStep(cookie, "234.23.12.2.4", 0, 0, taskID);
+      await taskCtrl.removeChecklistStep(cookie, "invalid-ip", 0, 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -720,6 +758,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.removeTaskChecklistDue(cookie, "234.23.12.2.4", 1, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -727,7 +766,8 @@ describe("Task model test", () => {
     }
 
     try {
-      await taskCtrl.removeTaskChecklistDue(cookie, "234.23.12.2.4", 0, taskID);
+      await taskCtrl.removeTaskChecklistDue("invalid-cookie", "234.23.12.2.4", 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -735,7 +775,8 @@ describe("Task model test", () => {
     }
 
     try {
-      await taskCtrl.removeTaskChecklistDue(cookie, "234.23.12.2.4", 0, taskID);
+      await taskCtrl.removeTaskChecklistDue(cookie, "invalid-ip", 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -759,6 +800,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.removeTaskChecklistReminder(cookie, "234.23.12.2.4", 1, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
@@ -766,7 +808,8 @@ describe("Task model test", () => {
     }
 
     try {
-      await taskCtrl.removeTaskChecklistReminder(cookie, "234.23.12.2.4", 0, taskID);
+      await taskCtrl.removeTaskChecklistReminder("invalid-cookie", "234.23.12.2.4", 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -774,7 +817,8 @@ describe("Task model test", () => {
     }
 
     try {
-      await taskCtrl.removeTaskChecklistReminder(cookie, "234.23.12.2.4", 0, taskID);
+      await taskCtrl.removeTaskChecklistReminder(cookie, "invalid-ip", 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -788,6 +832,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.removeTaskChecklist("invalid-cookie", "234.23.12.2.4", 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -796,6 +841,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.removeTaskChecklist(cookie, "invalid-ip", 0, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(401);
@@ -814,6 +860,7 @@ describe("Task model test", () => {
 
     try {
       await taskCtrl.removeTaskChecklist(cookie, "234.23.12.2.4", 1, taskID);
+      fail("Meant to have error");
     } catch (response) {
       expect(response.error).toBeTruthy();
       expect(response.status).toBe(400);
