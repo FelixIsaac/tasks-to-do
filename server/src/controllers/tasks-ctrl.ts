@@ -647,6 +647,12 @@ export const updateTaskCover = async (cookie: string, ip: string, cover: ITaskDo
     message: "Missing task cover or taskID ID"
   };
 
+  if (!/^http(s)?:\/\/.+\..+$/.test(cover)) throw {
+    error: true,
+    status: 400,
+    message: "Invalid link URL"
+  };
+
   const { list, owner } = await verifyTaskOwner(cookie, ip, taskID);
 
   if (!owner) throw {
