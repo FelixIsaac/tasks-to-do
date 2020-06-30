@@ -46,6 +46,7 @@ describe("List model test", () => {
       expect(response.status).toBe(200);
       expect(response.message).toBe("Created list");
       expect(updatedUser.lists).toHaveLength(1);
+      expect(response).toMatchSnapshot();
 
       list = updatedUser.lists[0] as IListDocument;
     } catch (err) {
